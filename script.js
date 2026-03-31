@@ -16,14 +16,14 @@ var formData = {
 };
 
 var currentStep = 1;
-var totalSteps = 10;
+var totalSteps = 11;
 
 var strengths = [
     { step: 2,  title: '平均年収100万円UP', emoji: '💵' },
     { step: 4,  title: '未経験特化',         emoji: '✨' },
     { step: 6,  title: '全て無料',            emoji: '🆓' },
     { step: 8,  title: '隠れホワイト求人多数', emoji: '🏢' },
-    { step: 10, title: '内定まで全てサポート', emoji: '🤝' }
+    { step: 11, title: '内定まで全てサポート', emoji: '🤝' }
 ];
 
 var currentWeek = 'next';
@@ -94,17 +94,21 @@ window.validateStep8 = function() {
 };
 
 window.validateStep9 = function() {
-    var e = document.getElementById('email').value;
     var p = document.getElementById('phone').value;
-    var er = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var ev = er.test(e);
     var pr = /^(0\d{1,4}-?\d{1,4}-?\d{4}|0\d{9,10})$/;
     var pv = pr.test(p.replace(/-/g, ''));
-    var ee = document.getElementById('emailError');
     var pe = document.getElementById('phoneError');
-    if (e.trim() !== '' && !ev) { ee.style.display = 'block'; } else { ee.style.display = 'none'; }
     if (p.trim() !== '' && !pv) { pe.style.display = 'block'; } else { pe.style.display = 'none'; }
-    document.getElementById('nextBtn9').disabled = !(ev && pv);
+    document.getElementById('nextBtn9').disabled = !pv;
+};
+
+window.validateStep10 = function() {
+    var e = document.getElementById('email').value;
+    var er = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var ev = er.test(e);
+    var ee = document.getElementById('emailError');
+    if (e.trim() !== '' && !ev) { ee.style.display = 'block'; } else { ee.style.display = 'none'; }
+    document.getElementById('nextBtn10').disabled = !ev;
 };
 
 window.initializeBirthDateSelects = function() {
@@ -231,7 +235,7 @@ window.selectSlot = function(si, dt) {
     }
     updatePreferenceDisplay();
     updateCellHighlights();
-    document.getElementById('nextBtn10').disabled = selectedSlots.length === 0;
+    document.getElementById('nextBtn11').disabled = selectedSlots.length === 0;
 };
 
 window.updatePreferenceDisplay = function() {
@@ -260,17 +264,26 @@ window.removePreference = function(pn) {
         selectedSlots.splice(pn - 1, 1);
         updatePreferenceDisplay();
         updateCellHighlights();
-        document.getElementById('nextBtn10').disabled = selectedSlots.length === 0;
+        document.getElementById('nextBtn11').disabled = selectedSlots.length === 0;
     }
 };
 
 window.nextStep = function() {
+    // 第1送信: step9（電話番号）→ fire-and-forget
+    if (currentStep === 9) {
+        var phoneVal = document.getElementById('phone').value;
+        fetch('https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'firstSubmit', phone: phoneVal })
+        }).catch(function(err) { console.log('firstSubmit failed:', err); });
+    }
     document.getElementById('step' + currentStep).classList.add('hidden');
     currentStep++;
     document.getElementById('step' + currentStep).classList.remove('hidden');
     updateProgress();
     document.getElementById('formContent').scrollTop = 0;
-    if (currentStep === 10) { generateCalendar(); }
+    if (currentStep === 11) { generateCalendar(); }
     var st = strengths.find(function(s) { return s.step === currentStep; });
     if (st) {
         var i = strengths.indexOf(st);
@@ -296,9 +309,9 @@ window.submitForm = function() {
     formData.email = document.getElementById('email').value;
     formData.prefecture = document.getElementById('prefecture').value;
 
-    document.getElementById('step10').classList.add('hidden');
+    document.getElementById('step11').classList.add('hidden');
     document.getElementById('completion').classList.remove('hidden');
-    currentStep = 11;
+    currentStep = 12;
     updateProgress();
 
     var t = document.getElementById('strengthBoxTitle');
@@ -312,7 +325,7 @@ window.submitForm = function() {
 
     var input = document.createElement('textarea');
     input.name = 'data';
-    input.value = JSON.stringify(formData);
+    input.value = JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' }));
     form.appendChild(input);
 
     var iframe = document.createElement('iframe');
