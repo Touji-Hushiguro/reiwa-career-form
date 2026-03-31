@@ -3,20 +3,20 @@
 
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
 
-// スプシ列定義（A=1始まり）
+// スプシ列定義（A=1始まり）※既存スプシの列順に合わせる
 var COL = {
   TIMESTAMP:          1,  // A
-  PHONE:              2,  // B
-  WORK_START:         3,  // C
-  JOB_TYPE:           4,  // D
-  CONDITION:          5,  // E
-  EDUCATION:          6,  // F
-  EMPLOYMENT_STATUS:  7,  // G
-  PREFECTURE:         8,  // H
+  WORK_START:         2,  // B
+  JOB_TYPE:           3,  // C
+  CONDITION:          4,  // D
+  EDUCATION:          5,  // E
+  EMPLOYMENT_STATUS:  6,  // F
+  FULL_NAME:          7,  // G
+  BIRTH_DATE:         8,  // H
   GENDER:             9,  // I
-  FULL_NAME:          10, // J
-  BIRTH_DATE:         11, // K
-  EMAIL:              12, // L
+  PHONE:              10, // J ★キー列
+  EMAIL:              11, // K
+  PREFECTURE:         12, // L
   INTERVIEW_1:        13, // M
   INTERVIEW_2:        14, // N
   INTERVIEW_3:        15  // O
@@ -130,17 +130,17 @@ function initializeHeaders() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var headers = [
     'タイムスタンプ',
-    '電話番号',
     '勤務開始時期',
     '希望職種',
     '希望条件',
     '最終学歴',
     '就業状況',
-    '都道府県',
-    '性別',
     '氏名',
     '生年月日',
+    '性別',
+    '電話番号',
     'メールアドレス',
+    '都道府県',
     '面談希望日時（第1）',
     '面談希望日時（第2）',
     '面談希望日時（第3）'
