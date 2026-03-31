@@ -269,14 +269,24 @@ window.removePreference = function(pn) {
 };
 
 window.nextStep = function() {
-    // 第1送信: step9（電話番号）→ fire-and-forget
+    // 第1送信: step9（電話番号）→ 隠しiframeでfire-and-forget
     if (currentStep === 9) {
         var phoneVal = document.getElementById('phone').value;
-        fetch('https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'firstSubmit', phone: phoneVal })
-        }).catch(function(err) { console.log('firstSubmit failed:', err); });
+        var iframe1 = document.createElement('iframe');
+        iframe1.name = 'hidden_iframe_first';
+        iframe1.style.display = 'none';
+        document.body.appendChild(iframe1);
+        var form1 = document.createElement('form');
+        form1.method = 'POST';
+        form1.action = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+        form1.target = 'hidden_iframe_first';
+        form1.style.display = 'none';
+        var input1 = document.createElement('textarea');
+        input1.name = 'data';
+        input1.value = JSON.stringify({ action: 'firstSubmit', phone: phoneVal });
+        form1.appendChild(input1);
+        document.body.appendChild(form1);
+        form1.submit();
     }
     document.getElementById('step' + currentStep).classList.add('hidden');
     currentStep++;
