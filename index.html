@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>れいわキャリア | 働き方も、自分らしく</title>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5HKK3XQP');</script>
+    <!-- End Google Tag Manager -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5HKK3XQP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://file.mysquadbeyond.com/uploads/article_photo/photo/6579087/71364a69-8bc3-4aa1-8d7d-ee938268dfdd.png" alt="れいわキャリア" class="lazyload">
+            </div>
+            <div class="tagline">働き方も、自分らしく</div>
+            <div class="strength-box" id="strengthBox" style="display: none;">
+                <div class="strength-box-title" id="strengthBoxTitle"></div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="content" id="formContent">
+            <!-- Step 1: いつごろから働きたいですか？ -->
+            <div class="step" id="step1">
+                <div class="step-indicator">簡単30秒</div>
+                <h2 class="question-title">いつごろから働きたいですか？<span class="required">*</span></h2>
+                <div class="options">
+                    <button class="option-button" onclick="selectOption('workStart', '1ヶ月以内', this)">
+                        <span class="option-emoji">👍</span>1ヶ月以内
+                    </button>
+                    <button class="option-button" onclick="selectOption('workStart', '3ヶ月以内', this)">
+                        <span class="option-emoji">✌️</span>3ヶ月以内
+                    </button>
+                    <button class="option-button" onclick="selectOption('workStart', '6ヶ月以内', this)">
+                        <span class="option-emoji">👋</span>6ヶ月以内
+                    </button>
+                    <button class="option-button" onclick="selectOption('workStart', '決まっていない', this)">
+                        決まっていない
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: 希望する職種 -->
+            <div class="step hidden" id="step2">
+                <div class="step-indicator">ステップ 2/7</div>
+                <h2 class="question-title">希望する職種を選択してください<span class="required">*</span></h2>
+                <div class="checkbox-grid" id="jobTypeGroup">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="営業" onchange="updateCheckboxes('jobType')">
+                        <span>営業</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="事務・アシスタント" onchange="updateCheckboxes('jobType')">
+                        <span>事務・アシスタント</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="販売・サービス" onchange="updateCheckboxes('jobType')">
+                        <span>販売・サービス</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="IT・エンジニア" onchange="updateCheckboxes('jobType')">
+                        <span>IT・エンジニア</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="製造・軽作業" onchange="updateCheckboxes('jobType')">
+                        <span>製造・軽作業</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="クリエイティブ" onchange="updateCheckboxes('jobType')">
+                        <span>クリエイティブ</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="専門職" onchange="updateCheckboxes('jobType')">
+                        <span>専門職</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="その他" onchange="updateCheckboxes('jobType')">
+                        <span>その他</span>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn2" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 3: 希望する条件 -->
+            <div class="step hidden" id="step3">
+                <div class="step-indicator">ステップ 3/8</div>
+                <h2 class="question-title">希望する条件を選択してください<span class="required">*</span></h2>
+                <div class="checkbox-grid" id="conditionGroup">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="年収UP" onchange="updateCheckboxes('condition')">
+                        <span>💵 年収UP</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="残業少なめ" onchange="updateCheckboxes('condition')">
+                        <span>⏰ 残業少なめ</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="服装自由" onchange="updateCheckboxes('condition')">
+                        <span>👔 服装自由</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="未経験OK" onchange="updateCheckboxes('condition')">
+                        <span>🌱 未経験OK</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="リモートワーク" onchange="updateCheckboxes('condition')">
+                        <span>🏠 リモートワーク</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="福利厚生充実" onchange="updateCheckboxes('condition')">
+                        <span>✨ 福利厚生充実</span>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn3" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 4: 最終学歴 -->
+            <div class="step hidden" id="step4">
+                <div class="step-indicator">ステップ 4/8</div>
+                <h2 class="question-title">最終学歴を選択してください<span class="required">*</span></h2>
+                <div class="options">
+                    <button class="option-button" onclick="selectOption('education', '高校卒業', this)">高校卒業</button>
+                    <button class="option-button" onclick="selectOption('education', '短大・専門学校卒業', this)">短大・専門学校卒業</button>
+                    <button class="option-button" onclick="selectOption('education', '大学卒業', this)">大学卒業</button>
+                    <button class="option-button" onclick="selectOption('education', 'その他', this)">その他</button>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn4" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 5: 就業状況 -->
+            <div class="step hidden" id="step5">
+                <div class="step-indicator">ステップ 5/8</div>
+                <h2 class="question-title">現在の就業状況を選択してください<span class="required">*</span></h2>
+                <div class="options">
+                    <button class="option-button" onclick="selectOption('employmentStatus', '正社員', this)">正社員</button>
+                    <button class="option-button" onclick="selectOption('employmentStatus', 'アルバイト・パート', this)">アルバイト・パート</button>
+                    <button class="option-button" onclick="selectOption('employmentStatus', '離職中', this)">離職中</button>
+                    <button class="option-button" onclick="selectOption('employmentStatus', 'その他', this)">その他</button>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn5" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 6: 都道府県 -->
+            <div class="step hidden" id="step6">
+                <div class="step-indicator">ステップ 6/10</div>
+                <h2 class="question-title">お住まいの都道府県を選択してください<span class="required">*</span></h2>
+                <div class="input-group">
+                    <label class="input-label">都道府県<span class="required">*</span></label>
+                    <select class="input-field" id="prefecture" onchange="validateStep6()">
+                        <option value="">選択してください</option>
+                        <option value="北海道">北海道</option>
+                        <option value="青森県">青森県</option>
+                        <option value="岩手県">岩手県</option>
+                        <option value="宮城県">宮城県</option>
+                        <option value="秋田県">秋田県</option>
+                        <option value="山形県">山形県</option>
+                        <option value="福島県">福島県</option>
+                        <option value="茨城県">茨城県</option>
+                        <option value="栃木県">栃木県</option>
+                        <option value="群馬県">群馬県</option>
+                        <option value="埼玉県">埼玉県</option>
+                        <option value="千葉県">千葉県</option>
+                        <option value="東京都">東京都</option>
+                        <option value="神奈川県">神奈川県</option>
+                        <option value="新潟県">新潟県</option>
+                        <option value="富山県">富山県</option>
+                        <option value="石川県">石川県</option>
+                        <option value="福井県">福井県</option>
+                        <option value="山梨県">山梨県</option>
+                        <option value="長野県">長野県</option>
+                        <option value="岐阜県">岐阜県</option>
+                        <option value="静岡県">静岡県</option>
+                        <option value="愛知県">愛知県</option>
+                        <option value="三重県">三重県</option>
+                        <option value="滋賀県">滋賀県</option>
+                        <option value="京都府">京都府</option>
+                        <option value="大阪府">大阪府</option>
+                        <option value="兵庫県">兵庫県</option>
+                        <option value="奈良県">奈良県</option>
+                        <option value="和歌山県">和歌山県</option>
+                        <option value="鳥取県">鳥取県</option>
+                        <option value="島根県">島根県</option>
+                        <option value="岡山県">岡山県</option>
+                        <option value="広島県">広島県</option>
+                        <option value="山口県">山口県</option>
+                        <option value="徳島県">徳島県</option>
+                        <option value="香川県">香川県</option>
+                        <option value="愛媛県">愛媛県</option>
+                        <option value="高知県">高知県</option>
+                        <option value="福岡県">福岡県</option>
+                        <option value="佐賀県">佐賀県</option>
+                        <option value="長崎県">長崎県</option>
+                        <option value="熊本県">熊本県</option>
+                        <option value="大分県">大分県</option>
+                        <option value="宮崎県">宮崎県</option>
+                        <option value="鹿児島県">鹿児島県</option>
+                        <option value="沖縄県">沖縄県</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn6" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 7: 性別 -->
+            <div class="step hidden" id="step7">
+                <div class="step-indicator">ステップ 7/10</div>
+                <h2 class="question-title">性別を選択してください<span class="required">*</span></h2>
+                <div class="options">
+                    <button class="option-button" onclick="selectOption('gender', '男性', this)">男性</button>
+                    <button class="option-button" onclick="selectOption('gender', '女性', this)">女性</button>
+                    <button class="option-button" onclick="selectOption('gender', 'その他', this)">その他</button>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn7" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 8: 氏名・年齢 -->
+            <div class="step hidden" id="step8">
+                <div class="step-indicator">ステップ 8/10</div>
+                <h2 class="question-title">氏名・年齢を入力してください</h2>
+                <div class="input-group">
+                    <label class="input-label">お名前<span class="required">*</span></label>
+                    <input type="text" class="input-field" id="fullName" placeholder="山田 太郎" oninput="validateStep8()">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">生年月日<span class="required">*</span></label>
+                    <div class="birth-date-selects">
+                        <select class="input-field" id="birthYear" onchange="validateStep8()">
+                            <option value="">年</option>
+                        </select>
+                        <select class="input-field" id="birthMonth" onchange="validateStep8()">
+                            <option value="">月</option>
+                        </select>
+                        <select class="input-field" id="birthDay" onchange="validateStep8()">
+                            <option value="">日</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn8" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 9: メールアドレス・電話番号 -->
+            <div class="step hidden" id="step9">
+                <div class="step-indicator">ステップ 9/10</div>
+                <h2 class="question-title">メールアドレス・電話番号を入力してください</h2>
+                <div class="input-group">
+                    <label class="input-label">メールアドレス<span class="required">*</span></label>
+                    <input type="email" class="input-field" id="email" placeholder="example@mail.com" oninput="validateStep9()">
+                    <span class="error-message" id="emailError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しいメールアドレスを入力してください</span>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">電話番号<span class="required">*</span></label>
+                    <input type="tel" class="input-field" id="phone" placeholder="090-1234-5678" oninput="validateStep9()">
+                    <span class="error-message" id="phoneError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しい電話番号を入力してください（例: 090-1234-5678）</span>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn9" onclick="nextStep()" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- Step 10: 希望日時 -->
+            <div class="step hidden" id="step10">
+                <div class="step-indicator">ステップ 10/10</div>
+                <h2 class="question-title">ご希望の日時を選択してください<br>
+                    <span style="font-size: 16px; color: #666;">第1希望から第3希望まで選択してください</span>
+                </h2>
+
+                <div class="week-selector">
+                    <button class="week-btn active" onclick="selectWeek('next', this)">登録後担当者からご連絡いたします</button>
+                </div>
+
+                <div class="calendar-container" id="calendarContainer"></div>
+
+                <div class="selected-slots-info" id="selectedSlotsInfo" style="display: none;">
+                    <div class="preference-item" id="preference1" style="display: none;">
+                        <span class="preference-label">第1希望:</span> <strong id="preference1Text"></strong>
+                        <button class="remove-btn" onclick="removePreference(1)">×</button>
+                    </div>
+                    <div class="preference-item" id="preference2" style="display: none;">
+                        <span class="preference-label">第2希望:</span> <strong id="preference2Text"></strong>
+                        <button class="remove-btn" onclick="removePreference(2)">×</button>
+                    </div>
+                    <div class="preference-item" id="preference3" style="display: none;">
+                        <span class="preference-label">第3希望:</span> <strong id="preference3Text"></strong>
+                        <button class="remove-btn" onclick="removePreference(3)">×</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                    <button class="btn btn-next" id="nextBtn10" onclick="submitForm()" disabled>登録完了</button>
+                </div>
+            </div>
+
+            <!-- Completion -->
+            <div class="step hidden" id="completion">
+                <div class="completion">
+                    <div class="completion-icon">✅</div>
+                    <h2 class="completion-title">予約が完了しました！</h2>
+                    <p class="completion-message">
+                        ご登録ありがとうございます。<br>
+                        担当者より1〜3営業日以内にご連絡させていただきます。<br>
+                        しばらくお待ちください。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>株式会社BOXが運営しています</p>
+            <p style="margin-top: 12px;">
+                <a href="#">利用規約</a> |
+                <a href="https://box-hr.co.jp/policy/">プライバシーポリシー</a> |
+                <a href="https://liff.line.me/2008784499-92DR4hmy/landing?follow=%40872lluqj&lp=bVrylO&liff_id=2008784499-92DR4hmy">お問い合わせ</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
