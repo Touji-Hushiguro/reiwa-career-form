@@ -269,9 +269,16 @@ window.removePreference = function(pn) {
 };
 
 window.nextStep = function() {
-    // 第1送信: step9（電話番号）→ 隠しiframeでfire-and-forget
+    // 第1送信: step9（電話番号）→ その時点までの全データを隠しiframeで送信
     if (currentStep === 9) {
-        var phoneVal = document.getElementById('phone').value;
+        formData.phone = document.getElementById('phone').value;
+        formData.fullName = document.getElementById('fullName').value;
+        var y = document.getElementById('birthYear').value;
+        var m = document.getElementById('birthMonth').value;
+        var d = document.getElementById('birthDay').value;
+        formData.birthDate = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        formData.prefecture = document.getElementById('prefecture').value;
+
         var iframe1 = document.createElement('iframe');
         iframe1.name = 'hidden_iframe_first';
         iframe1.style.display = 'none';
@@ -283,7 +290,7 @@ window.nextStep = function() {
         form1.style.display = 'none';
         var input1 = document.createElement('textarea');
         input1.name = 'data';
-        input1.value = JSON.stringify({ action: 'firstSubmit', phone: phoneVal });
+        input1.value = JSON.stringify(Object.assign({}, formData, { action: 'firstSubmit' }));
         form1.appendChild(input1);
         document.body.appendChild(form1);
         form1.submit();

@@ -51,17 +51,14 @@ function doPost(e) {
   }
 }
 
-// 第1送信: 電話番号のみ新規追加
+// 第1送信: その時点までの全データを新規追加
 function handleFirstSubmit(sheet, data) {
   var phone = data.phone || '';
   if (!phone) return;
 
-  var timestamp = new Date();
-  var newRow = new Array(Object.keys(COL).length).fill('');
-  newRow[COL.TIMESTAMP - 1] = timestamp;
-  newRow[COL.PHONE - 1]     = phone;
-
-  sheet.appendRow(newRow);
+  var row = buildFullRow(data);
+  row[COL.TIMESTAMP - 1] = new Date();
+  sheet.appendRow(row);
 }
 
 // 第2送信: 電話番号をキーに行を検索し全データ上書き（見つからなければ新規追加）
