@@ -1,29 +1,24 @@
 var formData = {
     workStart: '',
-    jobType: [],
-    condition: [],
-    education: '',
-    employmentStatus: '',
     gender: '',
-    interviewDateTime1: '',
-    interviewDateTime2: '',
-    interviewDateTime3: '',
-    fullName: '',
     birthDate: '',
+    prefecture: '',
+    fullName: '',
     phone: '',
     email: '',
-    prefecture: ''
+    interviewDateTime1: '',
+    interviewDateTime2: '',
+    interviewDateTime3: ''
 };
 
 var currentStep = 1;
-var totalSteps = 11;
+var totalSteps = 8;
 
 var strengths = [
-    { step: 2,  title: '平均年収100万円UP', emoji: '💵' },
-    { step: 4,  title: '未経験特化',         emoji: '✨' },
-    { step: 6,  title: '全て無料',            emoji: '🆓' },
-    { step: 8,  title: '隠れホワイト求人多数', emoji: '🏢' },
-    { step: 11, title: '内定まで全てサポート', emoji: '🤝' }
+    { step: 2, title: '平均年収100万円UP',    emoji: '💵' },
+    { step: 4, title: '未経験特化',            emoji: '✨' },
+    { step: 6, title: '全て無料',              emoji: '🆓' },
+    { step: 8, title: '内定まで全てサポート',   emoji: '🤝' }
 ];
 
 var currentWeek = 'next';
@@ -54,61 +49,42 @@ window.selectOption = function(f, v, e) {
     if (n) n.disabled = false;
     if (currentStep === 1) {
         setTimeout(function() { nextStep(); }, 300);
-    } else if (currentStep === 4 || currentStep === 5 || currentStep === 7) {
-        if (n) n.disabled = false;
-    } else if (currentStep === 6) {
-        validateStep6();
     }
 };
 
-window.updateCheckboxes = function(f) {
-    var g = f + 'Group';
-    var cs = document.querySelectorAll('#' + g + ' input[type="checkbox"]');
-    var ls = document.querySelectorAll('#' + g + ' .checkbox-label');
-    formData[f] = [];
-    ls.forEach(function(l, i) {
-        if (cs[i].checked) {
-            l.classList.add('checked');
-            formData[f].push(cs[i].value);
-        } else {
-            l.classList.remove('checked');
-        }
-    });
-    var n = document.getElementById('nextBtn' + currentStep);
-    if (n) {
-        n.disabled = formData[f].length === 0;
-    }
-};
-
-window.validateStep6 = function() {
-    var p = document.getElementById('prefecture').value;
-    document.getElementById('nextBtn6').disabled = p === '';
-};
-
-window.validateStep8 = function() {
-    var n = document.getElementById('fullName').value;
+window.validateStep3 = function() {
     var y = document.getElementById('birthYear').value;
     var m = document.getElementById('birthMonth').value;
     var d = document.getElementById('birthDay').value;
-    document.getElementById('nextBtn8').disabled = !(n.trim() !== '' && y !== '' && m !== '' && d !== '');
+    document.getElementById('nextBtn3').disabled = !(y !== '' && m !== '' && d !== '');
 };
 
-window.validateStep9 = function() {
+window.validateStep4 = function() {
+    var p = document.getElementById('prefecture').value;
+    document.getElementById('nextBtn4').disabled = p === '';
+};
+
+window.validateStep5 = function() {
+    var n = document.getElementById('fullName').value;
+    document.getElementById('nextBtn5').disabled = n.trim() === '';
+};
+
+window.validateStep6 = function() {
     var p = document.getElementById('phone').value;
     var pr = /^(0\d{1,4}-?\d{1,4}-?\d{4}|0\d{9,10})$/;
     var pv = pr.test(p.replace(/-/g, ''));
     var pe = document.getElementById('phoneError');
     if (p.trim() !== '' && !pv) { pe.style.display = 'block'; } else { pe.style.display = 'none'; }
-    document.getElementById('nextBtn9').disabled = !pv;
+    document.getElementById('nextBtn6').disabled = !pv;
 };
 
-window.validateStep10 = function() {
+window.validateStep7 = function() {
     var e = document.getElementById('email').value;
     var er = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     var ev = er.test(e);
     var ee = document.getElementById('emailError');
     if (e.trim() !== '' && !ev) { ee.style.display = 'block'; } else { ee.style.display = 'none'; }
-    document.getElementById('nextBtn10').disabled = !ev;
+    document.getElementById('nextBtn7').disabled = !ev;
 };
 
 window.initializeBirthDateSelects = function() {
@@ -235,7 +211,7 @@ window.selectSlot = function(si, dt) {
     }
     updatePreferenceDisplay();
     updateCellHighlights();
-    document.getElementById('nextBtn11').disabled = selectedSlots.length === 0;
+    document.getElementById('nextBtn8').disabled = selectedSlots.length === 0;
 };
 
 window.updatePreferenceDisplay = function() {
@@ -264,13 +240,13 @@ window.removePreference = function(pn) {
         selectedSlots.splice(pn - 1, 1);
         updatePreferenceDisplay();
         updateCellHighlights();
-        document.getElementById('nextBtn11').disabled = selectedSlots.length === 0;
+        document.getElementById('nextBtn8').disabled = selectedSlots.length === 0;
     }
 };
 
 window.nextStep = function() {
-    // 第1送信: step9（電話番号）→ その時点までの全データを隠しiframeで送信
-    if (currentStep === 9) {
+    // 第1送信: step6（電話番号）→ その時点までの全データを隠しiframeで送信
+    if (currentStep === 6) {
         formData.phone = document.getElementById('phone').value;
         formData.fullName = document.getElementById('fullName').value;
         var y = document.getElementById('birthYear').value;
@@ -300,7 +276,7 @@ window.nextStep = function() {
     document.getElementById('step' + currentStep).classList.remove('hidden');
     updateProgress();
     document.getElementById('formContent').scrollTop = 0;
-    if (currentStep === 11) { generateCalendar(); }
+    if (currentStep === 8) { generateCalendar(); }
     var st = strengths.find(function(s) { return s.step === currentStep; });
     if (st) {
         var i = strengths.indexOf(st);
@@ -326,9 +302,9 @@ window.submitForm = function() {
     formData.email = document.getElementById('email').value;
     formData.prefecture = document.getElementById('prefecture').value;
 
-    document.getElementById('step11').classList.add('hidden');
+    document.getElementById('step8').classList.add('hidden');
     document.getElementById('completion').classList.remove('hidden');
-    currentStep = 12;
+    currentStep = 9;
     updateProgress();
 
     var t = document.getElementById('strengthBoxTitle');
