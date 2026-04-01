@@ -289,7 +289,7 @@
                 <h2 class="question-title">メールアドレスを入力してください</h2>
                 <div class="input-group">
                     <label class="input-label">メールアドレス<span class="required">*</span></label>
-                    <input type="email" class="input-field" id="email" placeholder="example@mail.com" oninput="validateStep10()">
+                    <input type="email" class="input-field" id="email" placeholder="example@mail.com" oninput="validateStep10()" onchange="validateStep10()" onblur="validateStep10()">
                     <span class="error-message" id="emailError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しいメールアドレスを入力してください</span>
                 </div>
                 <div class="button-group">

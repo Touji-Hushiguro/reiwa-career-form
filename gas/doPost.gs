@@ -62,9 +62,8 @@ function doPost(e) {
       try { sendAutoReplyEmail(data); } catch(mailErr) { Logger.log('メールエラー: ' + mailErr); }
 
     } else {
-      // 旧フォーム互換（actionなし）: 新規行追加 + Slack + メール
+      // 旧フォーム互換（actionなし）: 新規行追加 + メールのみ（SlackはfirstSubmitのみ）
       writeNewRow(sheet, data);
-      notifySlack(data);
       try { sendAutoReplyEmail(data); } catch(mailErr) { Logger.log('メールエラー: ' + mailErr); }
     }
 
