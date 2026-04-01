@@ -49,7 +49,7 @@ function doPost(e) {
     if (action === 'firstSubmit') {
       // 電話番号取得タイミング: 新規行追加 + Slack通知のみ
       writeNewRow(sheet, data);
-      notifySlack(data);
+      try { notifySlack(data); } catch(slackErr) { Logger.log('Slackエラー: ' + slackErr); }
 
     } else if (action === 'finalSubmit') {
       // 完了タイミング: 既存行を全データ上書き + 自動返信メール
@@ -124,7 +124,8 @@ function findRowByPhone(sheet, phone) {
   if (lastRow < 2) return -1;
   var phoneCol = sheet.getRange(2, COL.PHONE, lastRow - 1, 1).getValues();
   var normalized = phone.replace(/-/g, '').trim();
-  for (var i = 0; i < phoneCol.length; i++) {
+  // 最新の行から逆順で検索（重複電話番号でも最新行を確実に更新）
+  for (var i = phoneCol.length - 1; i >= 0; i--) {
     if (String(phoneCol[i][0]).replace(/-/g, '').trim() === normalized) {
       return i + 2;
     }
