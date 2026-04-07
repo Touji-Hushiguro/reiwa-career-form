@@ -261,7 +261,7 @@ window.nextStep = function() {
         document.body.appendChild(iframe1);
         var form1 = document.createElement('form');
         form1.method = 'POST';
-        form1.action = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+        form1.action = 'https://script.google.com/macros/s/AKfycbyUBB70ydbhaLc7pa6SMPLMhsjxufSuMjPCXX2SGBU1m_GPGaeRmabsiFOPRBuZ5szITw/exec';
         form1.target = 'hidden_iframe_first';
         form1.style.display = 'none';
         var input1 = document.createElement('textarea');
@@ -312,7 +312,7 @@ window.submitForm = function() {
 
     var form = document.createElement('form');
     form.method = 'POST';
-    form.action = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+    form.action = 'https://script.google.com/macros/s/AKfycbyUBB70ydbhaLc7pa6SMPLMhsjxufSuMjPCXX2SGBU1m_GPGaeRmabsiFOPRBuZ5szITw/exec';
     form.target = 'hidden_iframe';
     form.style.display = 'none';
 
