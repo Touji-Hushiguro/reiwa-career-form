@@ -575,10 +575,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80%;
-    max-width: 320px;
+    width: auto;
+    white-space: nowrap;
     margin: 0 auto;
-    padding: 16px 20px;
+    padding: 16px 28px;
     background: #06C755;
     color: #fff;
     font-size: 17px;
