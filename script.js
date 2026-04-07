@@ -303,12 +303,7 @@ window.submitForm = function() {
     formData.prefecture = document.getElementById('prefecture').value;
 
     document.getElementById('step8').classList.add('hidden');
-    document.getElementById('completion').classList.remove('hidden');
     currentStep = 9;
-    updateProgress();
-
-    var t = document.getElementById('strengthBoxTitle');
-    if (t) { t.textContent = '🙏 ご回答ありがとうございます'; }
 
     var form = document.createElement('form');
     form.method = 'POST';
@@ -328,6 +323,11 @@ window.submitForm = function() {
 
     document.body.appendChild(form);
     form.submit();
+
+    // サンクスページへリダイレクト（GASへの送信と並行して遷移）
+    setTimeout(function() {
+        window.location.href = 'thanks.html';
+    }, 300);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
