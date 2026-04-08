@@ -196,37 +196,33 @@
                 </div>
             </div>
 
-            <!-- Step 8: 面談希望日時 -->
+            <!-- Step 8: 面談日程選択（クイック+その他プルダウン） -->
             <div class="step hidden" id="step8">
                 <div class="step-indicator">ステップ 8/8</div>
-                <h2 class="question-title">ご希望の日時を選択してください<br>
-                    <span style="font-size: 16px; color: #666;">第1希望から第3希望まで選択してください</span>
-                </h2>
+                <h2 class="question-title">まだ転職するか決めてなくてもOK！<br>まずは<span class="highlight-3min">3分</span>だけ、お話ししましょう</h2>
 
-                <div class="week-selector">
-                    <button class="week-btn active" onclick="selectWeek('next', this)">登録後担当者からご連絡いたします</button>
+                <div class="radio-options" id="step8Options">
+                    <div class="quick-slots-loading">読み込み中…</div>
                 </div>
 
-                <div class="calendar-container" id="calendarContainer"></div>
-
-                <div class="selected-slots-info" id="selectedSlotsInfo" style="display: none;">
-                    <div class="preference-item" id="preference1" style="display: none;">
-                        <span class="preference-label">第1希望:</span> <strong id="preference1Text"></strong>
-                        <button class="remove-btn" onclick="removePreference(1)">×</button>
+                <div class="other-slot-container" id="otherSlotContainer" style="display: none;">
+                    <div class="input-group">
+                        <label class="input-label">ご希望日</label>
+                        <select class="input-field" id="otherDate" onchange="onOtherDateChange()">
+                            <option value="">選択してください</option>
+                        </select>
                     </div>
-                    <div class="preference-item" id="preference2" style="display: none;">
-                        <span class="preference-label">第2希望:</span> <strong id="preference2Text"></strong>
-                        <button class="remove-btn" onclick="removePreference(2)">×</button>
-                    </div>
-                    <div class="preference-item" id="preference3" style="display: none;">
-                        <span class="preference-label">第3希望:</span> <strong id="preference3Text"></strong>
-                        <button class="remove-btn" onclick="removePreference(3)">×</button>
+                    <div class="input-group">
+                        <label class="input-label">ご希望時間</label>
+                        <select class="input-field" id="otherTime" onchange="onOtherTimeChange()" disabled>
+                            <option value="">選択してください</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="button-group">
                     <button class="btn btn-back" onclick="prevStep()">戻る</button>
-                    <button class="btn btn-next" id="nextBtn8" onclick="submitForm()" disabled>登録完了</button>
+                    <button class="btn btn-next" id="nextBtn8" onclick="submitForm()" disabled>次へ</button>
                 </div>
             </div>
 

@@ -9,6 +9,14 @@ var SPREADSHEET_ID = '1Vq0uK-w9M4EKft3l1TyzNz06yPrhtTTovH0Nb7inM1w';
 var SHEET_NAME     = '顧客データDB';
 var SLACK_URL      = 'YOUR_SLACK_WEBHOOK_URL'; // GASエディタ上で実際のURLに書き換えてください
 
+// カレンダー連携設定
+var CALENDAR_ID        = 'box-reiwa_reservation@box-hr.co.jp';
+var TZ                 = 'Asia/Tokyo';
+var SLOT_MINUTES       = 15;        // 1枠の長さ
+var BUSINESS_START_HOUR = 11;       // 営業開始時刻
+var BUSINESS_END_HOUR   = 20;       // 営業終了時刻（20時ちょうどで終了→最終枠は19:45-20:00）
+var LEAD_TIME_MINUTES  = 30;        // 現在時刻から何分後以降を候補にするか
+
 var MAIL_CONFIG = {
   SENDER_NAME:   '【送信専用】れいわキャリアお問い合わせ窓口',
   ADMIN_EMAIL:   'box-reiwa_reservation@box-hr.co.jp',
@@ -37,6 +45,137 @@ var COL = {
 
 // ============================================================
 // メイン
+// ============================================================
+
+// ============================================================
+// doGet: カレンダー空き枠取得エンドポイント
+// ?action=quick_slots  → 今日/明日/明後日から最速1枠ずつ（最大3枠）
+// ?action=all_slots    → 今後N日の全空き枠
+// ============================================================
+
+function doGet(e) {
+  try {
+    var action = (e && e.parameter && e.parameter.action) || 'quick_slots';
+    var result;
+    if (action === 'all_slots') {
+      var days = parseInt((e && e.parameter && e.parameter.days) || '14', 10);
+      result = getAllAvailableSlots(days);
+    } else {
+      result = getQuickSlots();
+    }
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, slots: result }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    Logger.log('doGetエラー: ' + err);
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 今日・明日・明後日 から「最も早い空き15分枠」を1つずつ返す
+function getQuickSlots() {
+  var now = new Date();
+  var results = [];
+  for (var i = 0; i < 3; i++) {
+    var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    var slot = findEarliestSlotOfDay(day, now);
+    if (slot) results.push(slot);
+  }
+  return results;
+}
+
+// 指定日数分の全15分空き枠を返す（「その他」用）
+function getAllAvailableSlots(days) {
+  var now = new Date();
+  var results = [];
+  for (var i = 0; i < days; i++) {
+    var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    var daySlots = findAllSlotsOfDay(day, now);
+    for (var j = 0; j < daySlots.length; j++) {
+      results.push(daySlots[j]);
+    }
+  }
+  return results;
+}
+
+// 指定日の最も早い空き枠を返す
+function findEarliestSlotOfDay(day, now) {
+  var slots = findAllSlotsOfDay(day, now);
+  return slots.length > 0 ? slots[0] : null;
+}
+
+// 指定日の全空き枠を返す（昇順）
+function findAllSlotsOfDay(day, now) {
+  var cal = CalendarApp.getCalendarById(CALENDAR_ID);
+  if (!cal) throw new Error('カレンダーが見つかりません: ' + CALENDAR_ID);
+
+  var dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), BUSINESS_START_HOUR, 0, 0);
+  var dayEnd   = new Date(day.getFullYear(), day.getMonth(), day.getDate(), BUSINESS_END_HOUR, 0, 0);
+
+  // リードタイムを考慮した「候補にできる最も早い時刻」
+  var earliestStart = new Date(now.getTime() + LEAD_TIME_MINUTES * 60 * 1000);
+  // SLOT_MINUTES単位に切り上げ
+  earliestStart.setSeconds(0, 0);
+  var remainder = earliestStart.getMinutes() % SLOT_MINUTES;
+  if (remainder !== 0) {
+    earliestStart.setMinutes(earliestStart.getMinutes() + (SLOT_MINUTES - remainder));
+  }
+
+  // その日の実際の開始時刻
+  var scanStart = dayStart.getTime() < earliestStart.getTime() ? earliestStart : dayStart;
+  if (scanStart.getTime() >= dayEnd.getTime()) return [];
+
+  // その日の予定を取得
+  var events = cal.getEvents(dayStart, dayEnd);
+
+  var result = [];
+  var cursor = new Date(scanStart.getTime());
+  while (cursor.getTime() + SLOT_MINUTES * 60 * 1000 <= dayEnd.getTime()) {
+    var slotEnd = new Date(cursor.getTime() + SLOT_MINUTES * 60 * 1000);
+    if (!isOverlapping(cursor, slotEnd, events)) {
+      result.push(formatSlot(cursor, slotEnd));
+    }
+    cursor = new Date(cursor.getTime() + SLOT_MINUTES * 60 * 1000);
+  }
+  return result;
+}
+
+function isOverlapping(slotStart, slotEnd, events) {
+  for (var i = 0; i < events.length; i++) {
+    var ev = events[i];
+    var evStart = ev.getStartTime();
+    var evEnd   = ev.getEndTime();
+    // 終日イベントは営業時間全体をブロックとみなす
+    if (ev.isAllDayEvent && ev.isAllDayEvent()) return true;
+    if (slotStart.getTime() < evEnd.getTime() && slotEnd.getTime() > evStart.getTime()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function formatSlot(start, end) {
+  var days = ['日', '月', '火', '水', '木', '金', '土'];
+  var dateLabel = (start.getMonth() + 1) + '/' + start.getDate() + '(' + days[start.getDay()] + ')';
+  var timeLabel = pad2(start.getHours()) + ':' + pad2(start.getMinutes()) + '〜' +
+                  pad2(end.getHours()) + ':' + pad2(end.getMinutes());
+  return {
+    dateLabel: dateLabel,
+    timeLabel: timeLabel,
+    label: dateLabel + ' ' + timeLabel,
+    start: Utilities.formatDate(start, TZ, "yyyy-MM-dd'T'HH:mm:ssXXX"),
+    end:   Utilities.formatDate(end,   TZ, "yyyy-MM-dd'T'HH:mm:ssXXX")
+  };
+}
+
+function pad2(n) {
+  return n < 10 ? '0' + n : String(n);
+}
+
+// ============================================================
+// doPost: メイン（既存）
 // ============================================================
 
 function doPost(e) {

@@ -21,8 +21,13 @@ var strengths = [
     { step: 8, title: '内定まで全てサポート',   emoji: '🤝' }
 ];
 
-var currentWeek = 'next';
-var selectedSlots = [];
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+
+var allSlotsCache = null;
+var quickSlotsCache = null;
+var step8Selection = null;        // {type: 'now'|'quick'|'other', index: number|null}
+var step8OtherDate = '';
+var step8OtherTime = '';
 
 window.showStrength = function(i) {
     var s = strengths[i];
@@ -111,137 +116,174 @@ window.initializeBirthDateSelects = function() {
     }
 };
 
-window.selectWeek = function(w, e) {
-    currentWeek = w;
-    document.querySelectorAll('.week-btn').forEach(function(b) { b.classList.remove('active'); });
-    e.classList.add('active');
-    generateCalendar();
-};
+// ========== プリフェッチ（フォーム読み込み時に裏で実行） ==========
 
-window.generateCalendar = function() {
-    var c = document.getElementById('calendarContainer');
-    var now = new Date();
-    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    var currentHour = now.getHours();
-    var ds = [];
-    for (var i = 0; i < 7; i++) {
-        var d = new Date(today);
-        d.setDate(today.getDate() + i);
-        ds.push(d);
-    }
-    var ws = [];
-    for (var h = 10; h <= 20; h++) { ws.push(String(h).padStart(2, '0') + ':00'); }
-    var ss = [];
-    for (var h2 = 13; h2 <= 18; h2++) { ss.push(String(h2).padStart(2, '0') + ':00'); }
-
-    var t = '<table class="calendar-table"><thead><tr><th>日時</th>';
-    ds.forEach(function(d) {
-        var dn = ['日', '月', '火', '水', '木', '金', '土'];
-        var n = dn[d.getDay()];
-        var mo = d.getMonth() + 1;
-        var dy = d.getDate();
-        var isToday = (d.getTime() === today.getTime());
-        var todayMark = isToday ? '<span style="color:#f59e0b;font-size:10px;display:block;">今日</span>' : '';
-        t += '<th><div class="date-header">' + mo + '/' + dy + todayMark + '<span class="day-name">(' + n + ')</span></div></th>';
-    });
-    t += '</tr></thead><tbody>';
-
-    var ms = Math.max(ws.length, ss.length);
-    for (var i2 = 0; i2 < ms; i2++) {
-        t += '<tr>';
-        var tm = ws[i2] || ss[i2] || '';
-        t += '<td>' + (tm || '') + '</td>';
-        ds.forEach(function(d) {
-            var dw = d.getDay();
-            var isSat = dw === 6;
-            var isSun = dw === 0;
-            var isToday = (d.getTime() === today.getTime());
-            var slotHour = parseInt((ws[i2] || ss[i2] || '0').split(':')[0]);
-            var st;
-            var ia = false;
-            if (!isSat && !isSun && i2 < ws.length) {
-                st = ws[i2];
-                ia = true;
-            } else if (isSat && i2 < ss.length) {
-                st = ss[i2];
-                ia = true;
+window.prefetchAllSlots = function() {
+    if (allSlotsCache) return;
+    fetch(GAS_URL + '?action=all_slots&days=14')
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+            if (json.success && json.slots) {
+                allSlotsCache = json.slots;
+                if (currentStep === 8) renderStep8(allSlotsCache);
             }
-            if (isToday && slotHour <= currentHour) { ia = false; }
-            if (ia && st) {
-                var ymd = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-                var si = ymd + '_' + st;
-                var dn2 = ['日', '月', '火', '水', '木', '金', '土'];
-                var dd = (d.getMonth() + 1) + '/' + d.getDate() + '(' + dn2[d.getDay()] + ') ' + st + '-' + String(parseInt(st.split(':')[0]) + 1).padStart(2, '0') + ':00';
-                t += '<td class="time-cell available" onclick="selectSlot(\'' + si + '\',\'' + dd + '\')">○</td>';
-            } else {
-                t += '<td class="time-cell unavailable">×</td>';
-            }
-        });
-        t += '</tr>';
-    }
-    t += '</tbody></table>';
-    c.innerHTML = t;
-    updateCellHighlights();
+        })
+        .catch(function() {});
 };
 
-window.updateCellHighlights = function() {
-    document.querySelectorAll('.time-cell').forEach(function(c) {
-        c.classList.remove('selected', 'preference-1', 'preference-2', 'preference-3');
-    });
-    selectedSlots.forEach(function(s, i) {
-        document.querySelectorAll('.time-cell').forEach(function(c) {
-            if (c.getAttribute('onclick') && c.getAttribute('onclick').includes(s.id)) {
-                c.classList.add('selected', 'preference-' + (i + 1));
-            }
-        });
-    });
-};
+// ========== Step8: 統合UI（クイック+その他プルダウン） ==========
 
-window.selectSlot = function(si, dt) {
-    var ei = selectedSlots.findIndex(function(s) { return s.id === si; });
-    if (ei !== -1) {
-        selectedSlots.splice(ei, 1);
-    } else {
-        if (selectedSlots.length < 3) {
-            selectedSlots.push({ id: si, text: dt });
-        } else {
-            alert('第3希望まで選択済みです。変更する場合は、既存の希望を削除してください。');
-            return;
-        }
-    }
-    updatePreferenceDisplay();
-    updateCellHighlights();
-    document.getElementById('nextBtn8').disabled = selectedSlots.length === 0;
-};
-
-window.updatePreferenceDisplay = function() {
-    var info = document.getElementById('selectedSlotsInfo');
-    if (selectedSlots.length === 0) {
-        info.style.display = 'none';
+window.fetchStep8Slots = function() {
+    var container = document.getElementById('step8Options');
+    if (allSlotsCache) {
+        renderStep8(allSlotsCache);
         return;
     }
-    info.style.display = 'block';
-    for (var j = 1; j <= 3; j++) {
-        var pd = document.getElementById('preference' + j);
-        var pt = document.getElementById('preference' + j + 'Text');
-        if (selectedSlots[j - 1]) {
-            pd.style.display = 'flex';
-            pt.textContent = selectedSlots[j - 1].text;
-            formData['interviewDateTime' + j] = selectedSlots[j - 1].text;
-        } else {
-            pd.style.display = 'none';
-            formData['interviewDateTime' + j] = '';
+    container.innerHTML = '<div class="quick-slots-loading">読み込み中…</div>';
+    fetch(GAS_URL + '?action=all_slots&days=14')
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+            if (!json.success || !json.slots || json.slots.length === 0) {
+                container.innerHTML = '<div class="quick-slots-empty">直近の空き枠がありません。<br>「その他」から日程を選択してください。</div>';
+                return;
+            }
+            allSlotsCache = json.slots;
+            renderStep8(json.slots);
+        })
+        .catch(function(err) {
+            container.innerHTML = '<div class="quick-slots-empty">空き枠の取得に失敗しました。<br>「その他」から日程を選択してください。</div>';
+        });
+};
+
+window.renderStep8 = function(slots) {
+    var container = document.getElementById('step8Options');
+    if (!slots || slots.length === 0) {
+        container.innerHTML = '<div class="quick-slots-empty">直近の空き枠がありません。<br>「その他」から日程を選択してください。</div>';
+        return;
+    }
+    // 1日1枠で最大3日抽出
+    var seen = {};
+    var quick = [];
+    for (var i = 0; i < slots.length && quick.length < 3; i++) {
+        if (!seen[slots[i].dateLabel]) {
+            seen[slots[i].dateLabel] = true;
+            quick.push(slots[i]);
         }
+    }
+    quickSlotsCache = quick;
+
+    var html = '';
+    // 今すぐ相談する
+    html += '<label class="radio-option" onclick="selectStep8Option(\'now\', null)">' +
+            '<span class="radio-circle"></span>' +
+            '<span>今すぐ相談する</span>' +
+            '</label>';
+    // クイック枠
+    quick.forEach(function(s, i) {
+        html += '<label class="radio-option" onclick="selectStep8Option(\'quick\', ' + i + ')">' +
+                '<span class="radio-circle"></span>' +
+                '<span>' + s.dateLabel + ' ' + s.timeLabel + '</span>' +
+                '</label>';
+    });
+    // その他
+    html += '<label class="radio-option" onclick="selectStep8Option(\'other\', null)">' +
+            '<span class="radio-circle"></span>' +
+            '<span>その他</span>' +
+            '</label>';
+    container.innerHTML = html;
+
+    // ご希望日プルダウンに空きがある日付を追加
+    var dateSelect = document.getElementById('otherDate');
+    var seenDates = {};
+    var dateOptions = '<option value="">選択してください</option>';
+    slots.forEach(function(s) {
+        if (!seenDates[s.dateLabel]) {
+            seenDates[s.dateLabel] = true;
+            dateOptions += '<option value="' + s.dateLabel + '">' + s.dateLabel + '</option>';
+        }
+    });
+    dateSelect.innerHTML = dateOptions;
+};
+
+window.selectStep8Option = function(type, index) {
+    step8Selection = { type: type, index: index };
+    var labels = document.querySelectorAll('#step8Options .radio-option');
+    labels.forEach(function(l) { l.classList.remove('selected'); });
+    var quickCount = quickSlotsCache ? quickSlotsCache.length : 0;
+    var targetIndex = type === 'now' ? 0 : (type === 'quick' ? 1 + index : 1 + quickCount);
+    if (labels[targetIndex]) labels[targetIndex].classList.add('selected');
+    var container = document.getElementById('otherSlotContainer');
+    container.style.display = (type === 'other') ? 'block' : 'none';
+    updateStep8NextButton();
+};
+
+window.onOtherDateChange = function() {
+    var date = document.getElementById('otherDate').value;
+    step8OtherDate = date;
+    var timeSelect = document.getElementById('otherTime');
+    if (!date || !allSlotsCache) {
+        timeSelect.innerHTML = '<option value="">選択してください</option>';
+        timeSelect.disabled = true;
+        step8OtherTime = '';
+        updateStep8NextButton();
+        return;
+    }
+    var times = allSlotsCache.filter(function(s) { return s.dateLabel === date; });
+    var html = '<option value="">選択してください</option>';
+    times.forEach(function(s) {
+        html += '<option value="' + s.timeLabel + '">' + s.timeLabel + '</option>';
+    });
+    timeSelect.innerHTML = html;
+    timeSelect.disabled = false;
+    step8OtherTime = '';
+    updateStep8NextButton();
+};
+
+window.onOtherTimeChange = function() {
+    step8OtherTime = document.getElementById('otherTime').value;
+    updateStep8NextButton();
+};
+
+window.updateStep8NextButton = function() {
+    var btn = document.getElementById('nextBtn8');
+    if (!step8Selection) {
+        btn.disabled = true;
+        return;
+    }
+    if (step8Selection.type === 'other') {
+        btn.disabled = !(step8OtherDate && step8OtherTime);
+    } else {
+        btn.disabled = false;
     }
 };
 
-window.removePreference = function(pn) {
-    if (pn <= selectedSlots.length) {
-        selectedSlots.splice(pn - 1, 1);
-        updatePreferenceDisplay();
-        updateCellHighlights();
-        document.getElementById('nextBtn8').disabled = selectedSlots.length === 0;
+window.getStep8SelectedLabel = function() {
+    if (!step8Selection) return '';
+    if (step8Selection.type === 'now') {
+        // 当日の最初に空いている枠を返す
+        if (allSlotsCache && allSlotsCache.length > 0) {
+            var now = new Date();
+            var todayY = now.getFullYear();
+            var todayM = now.getMonth();
+            var todayD = now.getDate();
+            for (var i = 0; i < allSlotsCache.length; i++) {
+                var s = allSlotsCache[i];
+                var d = new Date(s.start);
+                if (d.getFullYear() === todayY && d.getMonth() === todayM && d.getDate() === todayD) {
+                    return s.dateLabel + ' ' + s.timeLabel + '(今すぐ相談)';
+                }
+            }
+        }
+        return '今すぐ相談する';
     }
+    if (step8Selection.type === 'quick' && quickSlotsCache) {
+        var qs = quickSlotsCache[step8Selection.index];
+        return qs ? (qs.dateLabel + ' ' + qs.timeLabel) : '';
+    }
+    if (step8Selection.type === 'other') {
+        return step8OtherDate + ' ' + step8OtherTime;
+    }
+    return '';
 };
 
 window.nextStep = function() {
@@ -261,7 +303,7 @@ window.nextStep = function() {
         document.body.appendChild(iframe1);
         var form1 = document.createElement('form');
         form1.method = 'POST';
-        form1.action = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+        form1.action = GAS_URL;
         form1.target = 'hidden_iframe_first';
         form1.style.display = 'none';
         var input1 = document.createElement('textarea');
@@ -276,7 +318,7 @@ window.nextStep = function() {
     document.getElementById('step' + currentStep).classList.remove('hidden');
     updateProgress();
     document.getElementById('formContent').scrollTop = 0;
-    if (currentStep === 8) { generateCalendar(); }
+    if (currentStep === 8) { fetchStep8Slots(); }
     var st = strengths.find(function(s) { return s.step === currentStep; });
     if (st) {
         var i = strengths.indexOf(st);
@@ -302,12 +344,15 @@ window.submitForm = function() {
     formData.email = document.getElementById('email').value;
     formData.prefecture = document.getElementById('prefecture').value;
 
-    document.getElementById('step8').classList.add('hidden');
-    currentStep = 9;
+    formData.interviewDateTime1 = getStep8SelectedLabel();
+    formData.interviewDateTime2 = '';
+    formData.interviewDateTime3 = '';
+
+    document.getElementById('step' + currentStep).classList.add('hidden');
 
     var form = document.createElement('form');
     form.method = 'POST';
-    form.action = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+    form.action = GAS_URL;
     form.target = 'hidden_iframe';
     form.style.display = 'none';
 
@@ -333,4 +378,5 @@ window.submitForm = function() {
 document.addEventListener('DOMContentLoaded', function() {
     updateProgress();
     initializeBirthDateSelects();
+    prefetchAllSlots();  // ユーザーが入力中に裏でカレンダー取得
 });
