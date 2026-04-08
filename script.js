@@ -262,23 +262,15 @@ window.updateStep8NextButton = function() {
 window.getStep8Selection = function() {
     if (!step8Selection) return { label: '', start: '', end: '' };
     if (step8Selection.type === 'now') {
-        // 当日の最初に空いている枠を返す
+        // 予約時以降で最短の15分空き枠を返す（日を問わず）
+        // allSlotsCacheは現在時刻+リードタイム(30分)以降の枠を時系列昇順で返している
         if (allSlotsCache && allSlotsCache.length > 0) {
-            var now = new Date();
-            var todayY = now.getFullYear();
-            var todayM = now.getMonth();
-            var todayD = now.getDate();
-            for (var i = 0; i < allSlotsCache.length; i++) {
-                var s = allSlotsCache[i];
-                var d = new Date(s.start);
-                if (d.getFullYear() === todayY && d.getMonth() === todayM && d.getDate() === todayD) {
-                    return {
-                        label: s.dateLabel + ' ' + s.timeLabel + '(今すぐ相談)',
-                        start: s.start,
-                        end: s.end
-                    };
-                }
-            }
+            var s = allSlotsCache[0];
+            return {
+                label: s.dateLabel + ' ' + s.timeLabel + '(今すぐ相談)',
+                start: s.start,
+                end: s.end
+            };
         }
         return { label: '今すぐ相談する', start: '', end: '' };
     }
