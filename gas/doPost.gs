@@ -191,13 +191,14 @@ function doPost(e) {
       try { notifySlack(data); } catch(slackErr) { Logger.log('Slackエラー: ' + slackErr); }
 
     } else if (action === 'finalSubmit') {
-      // 完了タイミング: 既存行を全データ上書き + 自動返信メール
+      // 完了タイミング: 既存行を全データ上書き + カレンダー登録 + 自動返信メール
       var rowIndex = findRowByPhone(sheet, data.phone || '');
       if (rowIndex > 0) {
         updateRow(sheet, rowIndex, data);
       } else {
         writeNewRow(sheet, data);
       }
+      try { createInterviewEvent(data); } catch(calErr) { Logger.log('カレンダーエラー: ' + calErr); }
       try { sendAutoReplyEmail(data); } catch(mailErr) { Logger.log('メールエラー: ' + mailErr); }
 
     } else {
@@ -270,6 +271,46 @@ function findRowByPhone(sheet, phone) {
     }
   }
   return -1;
+}
+
+// ============================================================
+// カレンダーイベント作成（finalSubmitで呼ばれる）
+// ダブルブッキング許容: 空き状況チェックなしで強制作成
+// ============================================================
+
+function createInterviewEvent(data) {
+  if (!data.interviewStart || !data.interviewEnd) {
+    Logger.log('カレンダー: start/end未指定のためスキップ (label=' + (data.interviewDateTime1 || '') + ')');
+    return;
+  }
+  var cal = CalendarApp.getCalendarById(CALENDAR_ID);
+  if (!cal) {
+    throw new Error('カレンダーが見つかりません: ' + CALENDAR_ID);
+  }
+  var startDate = new Date(data.interviewStart);
+  var endDate   = new Date(data.interviewEnd);
+  var name = data.fullName || 'お客様';
+  var title = '【架電】' + name + '様 予約用カレンダー';
+  var description = buildEventDescription(data);
+  cal.createEvent(title, startDate, endDate, { description: description });
+  Logger.log('✅ カレンダー登録: ' + title + ' @ ' + Utilities.formatDate(startDate, TZ, 'yyyy/MM/dd HH:mm'));
+}
+
+function buildEventDescription(data) {
+  var lines = [];
+  lines.push('━━━ 応募内容 ━━━');
+  lines.push('お名前: ' + (data.fullName || ''));
+  lines.push('電話: ' + (data.phone || ''));
+  lines.push('メール: ' + (data.email || ''));
+  lines.push('生年月日: ' + (data.birthDate || ''));
+  lines.push('性別: ' + (data.gender || ''));
+  lines.push('都道府県: ' + (data.prefecture || ''));
+  lines.push('転職希望時期: ' + (data.workStart || ''));
+  lines.push('希望日時: ' + (data.interviewDateTime1 || ''));
+  lines.push('');
+  lines.push('━━━ スプレッドシート ━━━');
+  lines.push('https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID);
+  return lines.join('\n');
 }
 
 // ============================================================

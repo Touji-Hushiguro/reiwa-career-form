@@ -8,7 +8,9 @@ var formData = {
     email: '',
     interviewDateTime1: '',
     interviewDateTime2: '',
-    interviewDateTime3: ''
+    interviewDateTime3: '',
+    interviewStart: '',
+    interviewEnd: ''
 };
 
 var currentStep = 1;
@@ -257,8 +259,8 @@ window.updateStep8NextButton = function() {
     }
 };
 
-window.getStep8SelectedLabel = function() {
-    if (!step8Selection) return '';
+window.getStep8Selection = function() {
+    if (!step8Selection) return { label: '', start: '', end: '' };
     if (step8Selection.type === 'now') {
         // 当日の最初に空いている枠を返す
         if (allSlotsCache && allSlotsCache.length > 0) {
@@ -270,20 +272,38 @@ window.getStep8SelectedLabel = function() {
                 var s = allSlotsCache[i];
                 var d = new Date(s.start);
                 if (d.getFullYear() === todayY && d.getMonth() === todayM && d.getDate() === todayD) {
-                    return s.dateLabel + ' ' + s.timeLabel + '(今すぐ相談)';
+                    return {
+                        label: s.dateLabel + ' ' + s.timeLabel + '(今すぐ相談)',
+                        start: s.start,
+                        end: s.end
+                    };
                 }
             }
         }
-        return '今すぐ相談する';
+        return { label: '今すぐ相談する', start: '', end: '' };
     }
     if (step8Selection.type === 'quick' && quickSlotsCache) {
         var qs = quickSlotsCache[step8Selection.index];
-        return qs ? (qs.dateLabel + ' ' + qs.timeLabel) : '';
+        return qs ? { label: qs.dateLabel + ' ' + qs.timeLabel, start: qs.start, end: qs.end }
+                  : { label: '', start: '', end: '' };
     }
     if (step8Selection.type === 'other') {
-        return step8OtherDate + ' ' + step8OtherTime;
+        // 選択された日付・時間から allSlotsCache の該当エントリを検索
+        if (allSlotsCache) {
+            for (var j = 0; j < allSlotsCache.length; j++) {
+                var os = allSlotsCache[j];
+                if (os.dateLabel === step8OtherDate && os.timeLabel === step8OtherTime) {
+                    return {
+                        label: os.dateLabel + ' ' + os.timeLabel,
+                        start: os.start,
+                        end: os.end
+                    };
+                }
+            }
+        }
+        return { label: step8OtherDate + ' ' + step8OtherTime, start: '', end: '' };
     }
-    return '';
+    return { label: '', start: '', end: '' };
 };
 
 window.nextStep = function() {
@@ -344,9 +364,12 @@ window.submitForm = function() {
     formData.email = document.getElementById('email').value;
     formData.prefecture = document.getElementById('prefecture').value;
 
-    formData.interviewDateTime1 = getStep8SelectedLabel();
+    var sel = getStep8Selection();
+    formData.interviewDateTime1 = sel.label;
     formData.interviewDateTime2 = '';
     formData.interviewDateTime3 = '';
+    formData.interviewStart = sel.start;
+    formData.interviewEnd = sel.end;
 
     document.getElementById('step' + currentStep).classList.add('hidden');
 
