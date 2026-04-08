@@ -139,7 +139,7 @@ function findRowByPhone(sheet, phone) {
 
 function notifySlack(data) {
   var message = {
-    text: '<@U01R8QVGBGV> :mega: 新しい応募\n名前: ' + (data.fullName || '未入力') +
+    text: '<@U0ABRUC6JRE> :mega: 新しい応募\n名前: ' + (data.fullName || '未入力') +
           '\n電話: ' + (data.phone || '未入力') +
           '\n<https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/edit|スプレッドシート>'
   };
