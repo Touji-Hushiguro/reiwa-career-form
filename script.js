@@ -74,8 +74,60 @@ window.validateStep4 = function() {
 };
 
 window.validateStep5 = function() {
-    var n = document.getElementById('fullName').value;
-    document.getElementById('nextBtn5').disabled = n.trim() === '';
+    var input = document.getElementById('fullName');
+    var raw = input.value;
+
+    // ひらがな → カタカナに自動変換
+    var converted = raw.replace(/[\u3041-\u3096]/g, function(ch) {
+        return String.fromCharCode(ch.charCodeAt(0) + 0x60);
+    });
+    // 半角カナ → 全角カナに変換（濁点・半濁点の合成に対応）
+    var halfToFullDakuten = {
+        'ｶ':'ガ','ｷ':'ギ','ｸ':'グ','ｹ':'ゲ','ｺ':'ゴ',
+        'ｻ':'ザ','ｼ':'ジ','ｽ':'ズ','ｾ':'ゼ','ｿ':'ゾ',
+        'ﾀ':'ダ','ﾁ':'ヂ','ﾂ':'ヅ','ﾃ':'デ','ﾄ':'ド',
+        'ﾊ':'バ','ﾋ':'ビ','ﾌ':'ブ','ﾍ':'ベ','ﾎ':'ボ','ｳ':'ヴ'
+    };
+    var halfToFullHandakuten = {
+        'ﾊ':'パ','ﾋ':'ピ','ﾌ':'プ','ﾍ':'ペ','ﾎ':'ポ'
+    };
+    var halfKanaMap = {
+        'ｱ':'ア','ｲ':'イ','ｳ':'ウ','ｴ':'エ','ｵ':'オ','ｶ':'カ','ｷ':'キ','ｸ':'ク','ｹ':'ケ','ｺ':'コ',
+        'ｻ':'サ','ｼ':'シ','ｽ':'ス','ｾ':'セ','ｿ':'ソ','ﾀ':'タ','ﾁ':'チ','ﾂ':'ツ','ﾃ':'テ','ﾄ':'ト',
+        'ﾅ':'ナ','ﾆ':'ニ','ﾇ':'ヌ','ﾈ':'ネ','ﾉ':'ノ','ﾊ':'ハ','ﾋ':'ヒ','ﾌ':'フ','ﾍ':'ヘ','ﾎ':'ホ',
+        'ﾏ':'マ','ﾐ':'ミ','ﾑ':'ム','ﾒ':'メ','ﾓ':'モ','ﾔ':'ヤ','ﾕ':'ユ','ﾖ':'ヨ',
+        'ﾗ':'ラ','ﾘ':'リ','ﾙ':'ル','ﾚ':'レ','ﾛ':'ロ','ﾜ':'ワ','ｦ':'ヲ','ﾝ':'ン',
+        'ｧ':'ァ','ｨ':'ィ','ｩ':'ゥ','ｪ':'ェ','ｫ':'ォ','ｬ':'ャ','ｭ':'ュ','ｮ':'ョ','ｯ':'ッ','ｰ':'ー'
+    };
+    // 先に濁点・半濁点の合成を処理（2文字 → 1文字）
+    converted = converted.replace(/([\uff66-\uff9d])[\uff9e]/g, function(match, base) {
+        return halfToFullDakuten[base] || (halfKanaMap[base] || base);
+    });
+    converted = converted.replace(/([\uff66-\uff9d])[\uff9f]/g, function(match, base) {
+        return halfToFullHandakuten[base] || (halfKanaMap[base] || base);
+    });
+    // 残りの単独半角カナを変換
+    converted = converted.replace(/[\uff61-\uff9f]/g, function(ch) { return halfKanaMap[ch] || ch; });
+
+    // カーソル位置を保持しつつ値を更新
+    if (converted !== raw) {
+        var pos = input.selectionStart;
+        input.value = converted;
+        try { input.setSelectionRange(pos, pos); } catch(e) {}
+    }
+
+    var val = converted.trim();
+    // カタカナ（全角）+ スペース（半角/全角）+ 長音符 + 中黒 のみ許可
+    var kanaRegex = /^[\u30A0-\u30FF\u3000\s・]+$/;
+    var isValid = val !== '' && kanaRegex.test(val);
+
+    var err = document.getElementById('fullNameError');
+    if (val !== '' && !isValid) {
+        if (err) err.style.display = 'block';
+    } else {
+        if (err) err.style.display = 'none';
+    }
+    document.getElementById('nextBtn5').disabled = !isValid;
 };
 
 window.validateStep6 = function() {
