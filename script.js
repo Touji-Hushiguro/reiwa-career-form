@@ -10,7 +10,9 @@ var formData = {
     interviewDateTime2: '',
     interviewDateTime3: '',
     interviewStart: '',
-    interviewEnd: ''
+    interviewEnd: '',
+    utmSource: '',
+    utmContent: ''
 };
 
 var currentStep = 1;
@@ -390,7 +392,64 @@ window.submitForm = function() {
     }, 300);
 };
 
+// ========== UTM パラメータキャプチャ ==========
+// 優先順位: URL > sessionStorage > referrer推測 > 'direct'
+
+window.captureUtmParams = function() {
+    var params = new URLSearchParams(window.location.search);
+    var urlSource = params.get('utm_source');
+    var urlContent = params.get('utm_content');
+
+    // URLにあればsessionStorageを上書き（新しい流入を優先）
+    if (urlSource) {
+        try { sessionStorage.setItem('utm_source', urlSource); } catch(e) {}
+    }
+    if (urlContent) {
+        try { sessionStorage.setItem('utm_content', urlContent); } catch(e) {}
+    }
+
+    // sessionStorageから読み込み
+    var storedSource = '';
+    var storedContent = '';
+    try {
+        storedSource = sessionStorage.getItem('utm_source') || '';
+        storedContent = sessionStorage.getItem('utm_content') || '';
+    } catch(e) {}
+
+    // それでも空ならreferrerから推測
+    if (!storedSource) {
+        storedSource = inferSourceFromReferrer();
+        // 推測結果もsessionStorageに保存（セッション中で一貫性を保つ）
+        try { sessionStorage.setItem('utm_source', storedSource); } catch(e) {}
+    }
+
+    formData.utmSource = storedSource;
+    formData.utmContent = storedContent;
+};
+
+window.inferSourceFromReferrer = function() {
+    var ref = document.referrer || '';
+    if (!ref) return 'direct';
+    try {
+        var host = new URL(ref).hostname.toLowerCase();
+        if (host.indexOf('google.') !== -1) return 'google-organic';
+        if (host.indexOf('yahoo.') !== -1) return 'yahoo-organic';
+        if (host.indexOf('bing.') !== -1) return 'bing-organic';
+        if (host.indexOf('duckduckgo.') !== -1) return 'duckduckgo-organic';
+        if (host.indexOf('facebook.') !== -1 || host.indexOf('fb.') !== -1) return 'facebook-referral';
+        if (host.indexOf('instagram.') !== -1) return 'instagram-referral';
+        if (host.indexOf('twitter.') !== -1 || host.indexOf('x.com') !== -1 || host.indexOf('t.co') !== -1) return 'twitter-referral';
+        if (host.indexOf('tiktok.') !== -1) return 'tiktok-referral';
+        if (host.indexOf('line.') !== -1 || host.indexOf('liff.') !== -1) return 'line-referral';
+        if (host.indexOf('youtube.') !== -1) return 'youtube-referral';
+        return 'referral:' + host;
+    } catch(e) {
+        return 'direct';
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
+    captureUtmParams();   // URL/sessionStorage/referrerからUTM取得
     updateProgress();
     initializeBirthDateSelects();
     prefetchAllSlots();  // ユーザーが入力中に裏でカレンダー取得

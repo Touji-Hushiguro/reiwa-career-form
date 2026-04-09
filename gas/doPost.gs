@@ -40,8 +40,12 @@ var COL = {
   PREFECTURE:        12, // L
   INTERVIEW_1:       13, // M
   INTERVIEW_2:       14, // N
-  INTERVIEW_3:       15  // O
+  INTERVIEW_3:       15, // O
+  UTM_SOURCE:        16, // P 配信媒体
+  UTM_CONTENT:       17  // Q CR識別子
 };
+
+var TOTAL_COLS = 17;
 
 // ============================================================
 // メイン
@@ -186,12 +190,11 @@ function doPost(e) {
     var action = data.action || 'legacy';
 
     if (action === 'firstSubmit') {
-      // 電話番号取得タイミング: 新規行追加 + Slack通知のみ
+      // 電話番号取得タイミング: 新規行追加のみ（Slack通知はfinalSubmitで希望日時含めて送信）
       writeNewRow(sheet, data);
-      try { notifySlack(data); } catch(slackErr) { Logger.log('Slackエラー: ' + slackErr); }
 
     } else if (action === 'finalSubmit') {
-      // 完了タイミング: 既存行を全データ上書き + カレンダー登録 + 自動返信メール
+      // 完了タイミング: 既存行を全データ上書き + カレンダー登録 + Slack通知 + 自動返信メール
       var rowIndex = findRowByPhone(sheet, data.phone || '');
       if (rowIndex > 0) {
         updateRow(sheet, rowIndex, data);
@@ -199,6 +202,7 @@ function doPost(e) {
         writeNewRow(sheet, data);
       }
       try { createInterviewEvent(data); } catch(calErr) { Logger.log('カレンダーエラー: ' + calErr); }
+      try { notifySlack(data); } catch(slackErr) { Logger.log('Slackエラー: ' + slackErr); }
       try { sendAutoReplyEmail(data); } catch(mailErr) { Logger.log('メールエラー: ' + mailErr); }
 
     } else {
@@ -235,7 +239,9 @@ function buildRow(data, timestamp) {
     data.prefecture       || '',
     data.interviewDateTime1 || '',
     data.interviewDateTime2 || '',
-    data.interviewDateTime3 || ''
+    data.interviewDateTime3 || '',
+    data.utmSource        || '',
+    data.utmContent       || ''
   ];
 }
 
@@ -246,7 +252,7 @@ function writeNewRow(sheet, data) {
     if (values[i][0] !== '') lastRow = i + 1;
   }
   var newRow = lastRow + 1;
-  sheet.getRange(newRow, 1, 1, 15).setValues([buildRow(data)]);
+  sheet.getRange(newRow, 1, 1, TOTAL_COLS).setValues([buildRow(data)]);
 }
 
 function updateRow(sheet, rowIndex, data) {
@@ -255,7 +261,24 @@ function updateRow(sheet, rowIndex, data) {
   var ts = existingTimestamp
     ? Utilities.formatDate(new Date(existingTimestamp), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss')
     : Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
-  sheet.getRange(rowIndex, 1, 1, 15).setValues([buildRow(data, ts)]);
+
+  // firstSubmitで書き込んだUTMを保持する（finalSubmitで空になっていた場合の念のため）
+  var mergedData = mergeUtmFromExisting(sheet, rowIndex, data);
+  sheet.getRange(rowIndex, 1, 1, TOTAL_COLS).setValues([buildRow(mergedData, ts)]);
+}
+
+function mergeUtmFromExisting(sheet, rowIndex, data) {
+  var merged = {};
+  for (var k in data) merged[k] = data[k];
+  if (!merged.utmSource) {
+    var existingSource = sheet.getRange(rowIndex, COL.UTM_SOURCE).getValue();
+    if (existingSource) merged.utmSource = String(existingSource);
+  }
+  if (!merged.utmContent) {
+    var existingContent = sheet.getRange(rowIndex, COL.UTM_CONTENT).getValue();
+    if (existingContent) merged.utmContent = String(existingContent);
+  }
+  return merged;
 }
 
 function findRowByPhone(sheet, phone) {
@@ -318,11 +341,18 @@ function buildEventDescription(data) {
 // ============================================================
 
 function notifySlack(data) {
-  var message = {
-    text: '<@U0ABRUC6JRE> :mega: 新しい応募\n名前: ' + (data.fullName || '未入力') +
-          '\n電話: ' + (data.phone || '未入力') +
-          '\n<https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/edit|スプレッドシート>'
-  };
+  var lines = [];
+  lines.push('<@U0ABRUC6JRE> :mega: 新しい応募');
+  lines.push('名前: ' + (data.fullName || '未入力'));
+  lines.push('電話: ' + (data.phone || '未入力'));
+  lines.push('メール: ' + (data.email || '未入力'));
+  lines.push('都道府県: ' + (data.prefecture || '未入力'));
+  lines.push('転職希望時期: ' + (data.workStart || '未入力'));
+  lines.push('希望日時: ' + (data.interviewDateTime1 || '未入力'));
+  lines.push('配信媒体: ' + (data.utmSource || '不明'));
+  lines.push('CR: ' + (data.utmContent || '不明'));
+  lines.push('<https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/edit|スプレッドシート>');
+  var message = { text: lines.join('\n') };
   UrlFetchApp.fetch(SLACK_URL, {
     method: 'post',
     contentType: 'application/json',
