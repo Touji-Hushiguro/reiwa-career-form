@@ -139,6 +139,100 @@ window.validateStep6 = function() {
     document.getElementById('nextBtn6').disabled = !pv;
 };
 
+// ========== SMS認証（OTP）フロー ==========
+
+window.sendOTP = function() {
+    var phone = document.getElementById('phone').value;
+    var btn = document.getElementById('nextBtn6');
+    btn.disabled = true;
+    btn.textContent = '送信中...';
+
+    var fd = new FormData();
+    fd.append('data', JSON.stringify({ action: 'sendOTP', phone: phone }));
+
+    fetch(GAS_URL, { method: 'POST', body: fd })
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+            if (json.success) {
+                // OTP入力画面に切り替え
+                document.getElementById('phoneInputArea').style.display = 'none';
+                document.getElementById('otpInputArea').style.display = 'block';
+                document.getElementById('step6Title').textContent = '認証コードを入力してください';
+                document.getElementById('otpSentMessage').textContent =
+                    phone + ' に6桁の認証コードを送信しました。';
+                document.getElementById('otpCode').focus();
+            } else {
+                alert('SMS送信に失敗しました: ' + (json.error || '不明なエラー'));
+                btn.disabled = false;
+                btn.textContent = '認証コードを送信';
+            }
+        })
+        .catch(function(err) {
+            alert('通信エラーが発生しました。もう一度お試しください。');
+            btn.disabled = false;
+            btn.textContent = '認証コードを送信';
+        });
+};
+
+window.validateOTP = function() {
+    var code = document.getElementById('otpCode').value.replace(/\D/g, '');
+    document.getElementById('verifyBtn').disabled = code.length !== 6;
+};
+
+window.verifyOTP = function() {
+    var phone = document.getElementById('phone').value;
+    var code = document.getElementById('otpCode').value.replace(/\D/g, '');
+    var btn = document.getElementById('verifyBtn');
+    var errEl = document.getElementById('otpError');
+    btn.disabled = true;
+    btn.textContent = '認証中...';
+    errEl.style.display = 'none';
+
+    var fd = new FormData();
+    fd.append('data', JSON.stringify({ action: 'verifyOTP', phone: phone, code: code }));
+
+    fetch(GAS_URL, { method: 'POST', body: fd })
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+            if (json.success && json.verified) {
+                // 認証成功 → 次のステップへ
+                nextStep();
+            } else {
+                errEl.textContent = json.error || '認証コードが正しくありません。もう一度入力してください。';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = '認証する';
+            }
+        })
+        .catch(function(err) {
+            errEl.textContent = '通信エラーが発生しました。もう一度お試しください。';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = '認証する';
+        });
+};
+
+window.backToPhoneInput = function() {
+    document.getElementById('otpInputArea').style.display = 'none';
+    document.getElementById('phoneInputArea').style.display = 'block';
+    document.getElementById('step6Title').textContent = '電話番号を入力してください';
+    document.getElementById('otpCode').value = '';
+    document.getElementById('otpError').style.display = 'none';
+    document.getElementById('nextBtn6').disabled = false;
+    document.getElementById('nextBtn6').textContent = '認証コードを送信';
+};
+
+window.resendOTP = function() {
+    var link = document.getElementById('resendLink');
+    link.textContent = '再送中...';
+    link.style.pointerEvents = 'none';
+    sendOTP();
+    setTimeout(function() {
+        link.textContent = 'コードを再送する';
+        link.style.pointerEvents = 'auto';
+    }, 10000);
+};
+
 window.validateStep7 = function() {
     var e = document.getElementById('email').value;
     var er = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -167,18 +167,39 @@
                 </div>
             </div>
 
-            <!-- Step 6: 電話番号 -->
+            <!-- Step 6: 電話番号 + SMS認証 -->
             <div class="step hidden" id="step6">
                 <div class="step-indicator">ステップ 6/8</div>
-                <h2 class="question-title">電話番号を入力してください</h2>
-                <div class="input-group">
-                    <label class="input-label">電話番号<span class="required">*</span></label>
-                    <input type="tel" class="input-field" id="phone" placeholder="090-1234-5678" oninput="validateStep6()">
-                    <span class="error-message" id="phoneError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しい電話番号を入力してください（例: 090-1234-5678）</span>
+                <h2 class="question-title" id="step6Title">電話番号を入力してください</h2>
+
+                <!-- 電話番号入力（初期表示） -->
+                <div id="phoneInputArea">
+                    <div class="input-group">
+                        <label class="input-label">電話番号<span class="required">*</span></label>
+                        <input type="tel" class="input-field" id="phone" placeholder="090-1234-5678" oninput="validateStep6()">
+                        <span class="error-message" id="phoneError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しい電話番号を入力してください（例: 090-1234-5678）</span>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-back" onclick="prevStep()">戻る</button>
+                        <button class="btn btn-next" id="nextBtn6" onclick="sendOTP()" disabled>認証コードを送信</button>
+                    </div>
                 </div>
-                <div class="button-group">
-                    <button class="btn btn-back" onclick="prevStep()">戻る</button>
-                    <button class="btn btn-next" id="nextBtn6" onclick="nextStep()" disabled>次へ</button>
+
+                <!-- OTPコード入力（SMS送信後に表示） -->
+                <div id="otpInputArea" style="display: none;">
+                    <div class="input-group">
+                        <p style="font-size: 14px; color: #666; margin-bottom: 12px;" id="otpSentMessage"></p>
+                        <label class="input-label">認証コード（6桁）<span class="required">*</span></label>
+                        <input type="text" class="input-field" id="otpCode" placeholder="123456" maxlength="6" inputmode="numeric" pattern="[0-9]*" oninput="validateOTP()">
+                        <span class="error-message" id="otpError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;"></span>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-back" onclick="backToPhoneInput()">番号を変更</button>
+                        <button class="btn btn-next" id="verifyBtn" onclick="verifyOTP()" disabled>認証する</button>
+                    </div>
+                    <p style="text-align: center; margin-top: 12px;">
+                        <a href="javascript:void(0)" onclick="resendOTP()" id="resendLink" style="color: #06C755; font-size: 13px;">コードを再送する</a>
+                    </p>
                 </div>
             </div>
 
@@ -251,6 +272,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=20260409b"></script>
+    <script src="script.js?v=20260410a"></script>
 </body>
 </html>

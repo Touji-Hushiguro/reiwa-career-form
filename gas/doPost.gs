@@ -189,7 +189,13 @@ function doPost(e) {
     var data = JSON.parse(jsonString);
     var action = data.action || 'legacy';
 
-    if (action === 'firstSubmit') {
+    // ========== SMS認証（Twilio Verify） ==========
+    if (action === 'sendOTP') {
+      return handleSendOTP(data);
+    } else if (action === 'verifyOTP') {
+      return handleVerifyOTP(data);
+
+    } else if (action === 'firstSubmit') {
       // 電話番号取得タイミング: 新規行追加のみ（Slack通知はfinalSubmitで希望日時含めて送信）
       writeNewRow(sheet, data);
 
@@ -439,6 +445,81 @@ function sendAutoReplyEmail(data) {
 
   GmailApp.sendEmail(MAIL_CONFIG.ADMIN_EMAIL, adminSubject, adminBody);
   Logger.log('✅ メール送信完了: ' + email);
+}
+
+// ============================================================
+// SMS認証（Twilio Verify API）
+// ============================================================
+
+function getTwilioCredentials() {
+  var props = PropertiesService.getScriptProperties();
+  return {
+    accountSid:  props.getProperty('TWILIO_ACCOUNT_SID'),
+    authToken:   props.getProperty('TWILIO_AUTH_TOKEN'),
+    verifySid:   props.getProperty('TWILIO_VERIFY_SID')
+  };
+}
+
+function normalizePhoneJP(phone) {
+  var digits = String(phone).replace(/[-\s\u3000]/g, '');
+  if (digits.charAt(0) === '0') digits = digits.substring(1);
+  return '+81' + digits;
+}
+
+function handleSendOTP(data) {
+  var phone = normalizePhoneJP(data.phone || '');
+  if (!phone || phone.length < 12) {
+    return jsonResponse({ success: false, error: '電話番号が不正です' });
+  }
+  var tw = getTwilioCredentials();
+  var url = 'https://verify.twilio.com/v2/Services/' + tw.verifySid + '/Verifications';
+  var response = UrlFetchApp.fetch(url, {
+    method: 'post',
+    payload: { To: phone, Channel: 'sms' },
+    headers: {
+      Authorization: 'Basic ' + Utilities.base64Encode(tw.accountSid + ':' + tw.authToken)
+    },
+    muteHttpExceptions: true
+  });
+  var result = JSON.parse(response.getContentText());
+  if (result.status === 'pending') {
+    Logger.log('✅ OTP送信: ' + phone);
+    return jsonResponse({ success: true });
+  } else {
+    Logger.log('❌ OTP送信失敗: ' + response.getContentText());
+    return jsonResponse({ success: false, error: result.message || 'SMS送信に失敗しました' });
+  }
+}
+
+function handleVerifyOTP(data) {
+  var phone = normalizePhoneJP(data.phone || '');
+  var code = String(data.code || '').trim();
+  if (!phone || !code) {
+    return jsonResponse({ success: false, error: '電話番号またはコードが不正です' });
+  }
+  var tw = getTwilioCredentials();
+  var url = 'https://verify.twilio.com/v2/Services/' + tw.verifySid + '/VerificationChecks';
+  var response = UrlFetchApp.fetch(url, {
+    method: 'post',
+    payload: { To: phone, Code: code },
+    headers: {
+      Authorization: 'Basic ' + Utilities.base64Encode(tw.accountSid + ':' + tw.authToken)
+    },
+    muteHttpExceptions: true
+  });
+  var result = JSON.parse(response.getContentText());
+  if (result.status === 'approved') {
+    Logger.log('✅ OTP認証成功: ' + phone);
+    return jsonResponse({ success: true, verified: true });
+  } else {
+    Logger.log('❌ OTP認証失敗: ' + result.status);
+    return jsonResponse({ success: false, error: 'コードが正しくありません' });
+  }
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // ============================================================
