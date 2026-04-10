@@ -73,7 +73,22 @@ window.validateStep4 = function() {
     document.getElementById('nextBtn4').disabled = p === '';
 };
 
+// IME入力中フラグ（カタカナ変換のカーソルバグ防止）
+var isComposingName = false;
+(function() {
+    var el = document.getElementById('fullName');
+    if (el) {
+        el.addEventListener('compositionstart', function() { isComposingName = true; });
+        el.addEventListener('compositionend', function() {
+            isComposingName = false;
+            validateStep5();
+        });
+    }
+})();
+
 window.validateStep5 = function() {
+    if (isComposingName) return; // IME変換中はスキップ
+
     var input = document.getElementById('fullName');
     var raw = input.value;
 
