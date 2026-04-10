@@ -151,7 +151,12 @@ window.sendOTP = function() {
     fd.append('data', JSON.stringify({ action: 'sendOTP', phone: phone }));
 
     fetch(GAS_URL, { method: 'POST', body: fd })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            return res.text().then(function(text) {
+                try { return JSON.parse(text); }
+                catch(e) { throw new Error('JSONパースエラー: ' + text.substring(0, 200)); }
+            });
+        })
         .then(function(json) {
             if (json.success) {
                 // OTP入力画面に切り替え
@@ -192,7 +197,12 @@ window.verifyOTP = function() {
     fd.append('data', JSON.stringify({ action: 'verifyOTP', phone: phone, code: code }));
 
     fetch(GAS_URL, { method: 'POST', body: fd })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            return res.text().then(function(text) {
+                try { return JSON.parse(text); }
+                catch(e) { throw new Error('JSONパースエラー: ' + text.substring(0, 200)); }
+            });
+        })
         .then(function(json) {
             if (json.success && json.verified) {
                 // 認証成功 → 次のステップへ
@@ -205,7 +215,7 @@ window.verifyOTP = function() {
             }
         })
         .catch(function(err) {
-            errEl.textContent = '通信エラーが発生しました。もう一度お試しください。';
+            errEl.textContent = 'エラー: ' + err.message;
             errEl.style.display = 'block';
             btn.disabled = false;
             btn.textContent = '認証する';
