@@ -297,32 +297,39 @@ window.initializeBirthDateSelects = function() {
 
 // ========== プリフェッチ（フォーム読み込み時に裏で実行） ==========
 
+var prefetchPromise = null;
+
 window.prefetchAllSlots = function() {
     if (allSlotsCache) return;
-    fetch(GAS_URL + '?action=all_slots&days=14')
+    if (prefetchPromise) return;
+    prefetchPromise = fetch(GAS_URL + '?action=all_slots&days=14')
         .then(function(res) { return res.json(); })
         .then(function(json) {
             if (json.success && json.slots) {
                 allSlotsCache = json.slots;
                 if (currentStep === 8) renderStep8(allSlotsCache);
             }
+            return json;
         })
-        .catch(function() {});
+        .catch(function() { prefetchPromise = null; });
 };
 
 // ========== Step8: 統合UI（クイック+その他プルダウン） ==========
 
 window.fetchStep8Slots = function() {
     var container = document.getElementById('step8Options');
+    // プリフェッチ済みなら即表示
     if (allSlotsCache) {
         renderStep8(allSlotsCache);
         return;
     }
     container.innerHTML = '<div class="quick-slots-loading">読み込み中…</div>';
-    fetch(GAS_URL + '?action=all_slots&days=14')
-        .then(function(res) { return res.json(); })
+    // プリフェッチ中ならその完了を待つ（二重リクエスト防止）
+    var promise = prefetchPromise || fetch(GAS_URL + '?action=all_slots&days=14').then(function(res) { return res.json(); });
+    promise
         .then(function(json) {
-            if (!json.success || !json.slots || json.slots.length === 0) {
+            if (allSlotsCache) { renderStep8(allSlotsCache); return; }
+            if (!json || !json.success || !json.slots || json.slots.length === 0) {
                 container.innerHTML = '<div class="quick-slots-empty">直近の空き枠がありません。<br>「その他」から日程を選択してください。</div>';
                 return;
             }
