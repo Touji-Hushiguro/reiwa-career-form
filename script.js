@@ -56,7 +56,7 @@ window.selectOption = function(f, v, e) {
     e.classList.add('selected');
     var n = document.getElementById('nextBtn' + currentStep);
     if (n) n.disabled = false;
-    if (currentStep === 1) {
+    if (currentStep === 1 || currentStep === 2) {
         setTimeout(function() { nextStep(); }, 300);
     }
 };
@@ -65,12 +65,16 @@ window.validateStep3 = function() {
     var y = document.getElementById('birthYear').value;
     var m = document.getElementById('birthMonth').value;
     var d = document.getElementById('birthDay').value;
-    document.getElementById('nextBtn3').disabled = !(y !== '' && m !== '' && d !== '');
+    if (y !== '' && m !== '' && d !== '') {
+        setTimeout(function() { nextStep(); }, 300);
+    }
 };
 
 window.validateStep4 = function() {
     var p = document.getElementById('prefecture').value;
-    document.getElementById('nextBtn4').disabled = p === '';
+    if (p !== '') {
+        setTimeout(function() { nextStep(); }, 300);
+    }
 };
 
 // IME入力中フラグ（カタカナ変換のカーソルバグ防止）
