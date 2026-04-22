@@ -89,6 +89,14 @@ body {
     text-align: center;
 }
 
+.question-note {
+    font-size: 9px;
+    color: #888;
+    text-align: left;
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
 .required {
     color: #ff4444;
     font-size: 12px;

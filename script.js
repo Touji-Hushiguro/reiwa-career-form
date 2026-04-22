@@ -16,7 +16,7 @@ var formData = {
 };
 
 var currentStep = 1;
-var totalSteps = 8;
+var totalSteps = 7;
 
 var strengths = [
     { step: 2, title: '平均年収100万円UP',    emoji: '💵' },
@@ -155,7 +155,14 @@ window.validateStep6 = function() {
     var pv = pr.test(p.replace(/-/g, ''));
     var pe = document.getElementById('phoneError');
     if (p.trim() !== '' && !pv) { pe.style.display = 'block'; } else { pe.style.display = 'none'; }
-    document.getElementById('nextBtn6').disabled = !pv;
+
+    var e = document.getElementById('email').value;
+    var er = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var ev = er.test(e);
+    var ee = document.getElementById('emailError');
+    if (e.trim() !== '' && !ev) { ee.style.display = 'block'; } else { ee.style.display = 'none'; }
+
+    document.getElementById('nextBtn6').disabled = !(pv && ev);
 };
 
 // ========== SMS認証（OTP）フロー ==========
@@ -182,6 +189,7 @@ window.sendOTP = function() {
                 document.getElementById('phoneInputArea').style.display = 'none';
                 document.getElementById('otpInputArea').style.display = 'block';
                 document.getElementById('step6Title').textContent = '認証コードを入力してください';
+                document.getElementById('step6Note').style.display = 'none';
                 document.getElementById('otpSentMessage').textContent =
                     phone + ' に6桁の認証コードを送信しました。';
                 document.getElementById('otpCode').focus();
@@ -245,6 +253,7 @@ window.backToPhoneInput = function() {
     document.getElementById('otpInputArea').style.display = 'none';
     document.getElementById('phoneInputArea').style.display = 'block';
     document.getElementById('step6Title').textContent = '電話番号を入力してください';
+    document.getElementById('step6Note').style.display = '';
     document.getElementById('otpCode').value = '';
     document.getElementById('otpError').style.display = 'none';
     document.getElementById('nextBtn6').disabled = false;
@@ -486,6 +495,7 @@ window.nextStep = function() {
     // 第1送信: step6（電話番号）→ その時点までの全データを隠しiframeで送信
     if (currentStep === 6) {
         formData.phone = document.getElementById('phone').value;
+        formData.email = document.getElementById('email').value;
         formData.fullName = document.getElementById('fullName').value;
         var y = document.getElementById('birthYear').value;
         var m = document.getElementById('birthMonth').value;
@@ -511,6 +521,7 @@ window.nextStep = function() {
     }
     document.getElementById('step' + currentStep).classList.add('hidden');
     currentStep++;
+    if (currentStep === 7) { currentStep = 8; } // step7（メール）はstep6に統合済み
     document.getElementById('step' + currentStep).classList.remove('hidden');
     updateProgress();
     document.getElementById('formContent').scrollTop = 0;
@@ -525,6 +536,7 @@ window.nextStep = function() {
 window.prevStep = function() {
     document.getElementById('step' + currentStep).classList.add('hidden');
     currentStep--;
+    if (currentStep === 7) { currentStep = 6; } // step7（メール）はstep6に統合済み
     document.getElementById('step' + currentStep).classList.remove('hidden');
     updateProgress();
     document.getElementById('formContent').scrollTop = 0;

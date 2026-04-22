@@ -7,7 +7,7 @@
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5HKK3XQP');</script>
     <!-- End Google Tag Manager -->
-    <link rel="stylesheet" href="style.css?v=20260408">
+    <link rel="stylesheet" href="style.css?v=20260422d">
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -151,11 +151,12 @@
 
             <!-- Step 5: 氏名 -->
             <div class="step hidden" id="step5">
-                <div class="step-indicator">ステップ 5/8</div>
+                <div class="step-indicator">ステップ 5/7</div>
                 <h2 class="question-title">お名前をカタカナで入力してください</h2>
                 <div class="input-group">
                     <label class="input-label">お名前（カタカナ）<span class="required">*</span></label>
                     <input type="text" class="input-field" id="fullName" placeholder="ヤマダ タロウ" oninput="validateStep5()" autocomplete="off">
+                    <p class="question-note">*個人情報は外部に公開されません</p>
                     <span class="error-message" id="fullNameError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">全角カタカナで入力してください（例: ヤマダ タロウ）</span>
                 </div>
                 <div class="button-group">
@@ -164,16 +165,22 @@
                 </div>
             </div>
 
-            <!-- Step 6: 電話番号 + SMS認証 -->
+            <!-- Step 6: 連絡先（電話番号＋メール） + SMS認証 -->
             <div class="step hidden" id="step6">
-                <div class="step-indicator">ステップ 6/8</div>
-                <h2 class="question-title" id="step6Title">電話番号を入力してください</h2>
+                <div class="step-indicator">ステップ 6/7</div>
+                <h2 class="question-title" id="step6Title">連絡先を入力してください</h2>
 
-                <!-- 電話番号入力（初期表示） -->
+                <!-- 連絡先入力（初期表示） -->
                 <div id="phoneInputArea">
                     <div class="input-group">
+                        <label class="input-label">メールアドレス<span class="required">*</span></label>
+                        <input type="email" class="input-field" id="email" placeholder="example@mail.com" autocomplete="email" oninput="validateStep6()" onchange="validateStep6()" onblur="validateStep6()">
+                        <span class="error-message" id="emailError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しいメールアドレスを入力してください</span>
+                    </div>
+                    <div class="input-group">
                         <label class="input-label">電話番号<span class="required">*</span></label>
-                        <input type="tel" class="input-field" id="phone" placeholder="090-1234-5678" oninput="validateStep6()">
+                        <input type="tel" class="input-field" id="phone" placeholder="090-1234-5678" autocomplete="tel-national" oninput="validateStep6()">
+                        <p class="question-note" id="step6Note">*電話番号認証に使用します</p>
                         <span class="error-message" id="phoneError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しい電話番号を入力してください（例: 090-1234-5678）</span>
                     </div>
                     <div class="button-group">
@@ -200,14 +207,14 @@
                 </div>
             </div>
 
-            <!-- Step 7: メールアドレス -->
-            <div class="step hidden" id="step7">
+            <!-- Step 7: メールアドレス（step6に統合したため無効化） -->
+            <div class="step hidden" id="step7" style="display: none;">
                 <div class="step-indicator">ステップ 7/8</div>
                 <h2 class="question-title">メールアドレスを入力してください</h2>
                 <div class="input-group">
                     <label class="input-label">メールアドレス<span class="required">*</span></label>
-                    <input type="email" class="input-field" id="email" placeholder="example@mail.com" oninput="validateStep7()" onchange="validateStep7()" onblur="validateStep7()">
-                    <span class="error-message" id="emailError" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しいメールアドレスを入力してください</span>
+                    <input type="email" class="input-field" id="emailStep7Disabled" placeholder="example@mail.com">
+                    <span class="error-message" id="emailErrorStep7Disabled" style="display: none; color: #ff4444; font-size: 12px; margin-top: 4px;">正しいメールアドレスを入力してください</span>
                 </div>
                 <div class="button-group">
                     <button class="btn btn-back" onclick="prevStep()">戻る</button>
@@ -217,7 +224,7 @@
 
             <!-- Step 8: 面談日程選択（クイック+その他プルダウン） -->
             <div class="step hidden" id="step8">
-                <div class="step-indicator">ステップ 8/8</div>
+                <div class="step-indicator">ステップ 7/7</div>
                 <h2 class="question-title">まだ転職するか決めてなくてもOK！<br>まずは<span class="highlight-3min">3分</span>だけ、お話ししましょう</h2>
 
                 <div class="radio-options" id="step8Options">
@@ -270,6 +277,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=20260420b"></script>
+    <script src="script.js?v=20260422f"></script>
 </body>
 </html>
