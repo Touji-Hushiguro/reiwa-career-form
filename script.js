@@ -582,7 +582,8 @@ window.submitForm = function() {
 
     // サンクスページへリダイレクト（GASへの送信と並行して遷移）
     setTimeout(function() {
-        window.location.href = 'thanks.html';
+        var isFv = location.pathname === '/fv' || location.pathname.indexOf('/fv/') === 0;
+        window.location.href = '/thanks.html?v=' + (isFv ? 'fv' : 'ctrl');
     }, 300);
 };
 
