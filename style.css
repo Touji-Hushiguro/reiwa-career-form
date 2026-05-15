@@ -89,6 +89,14 @@ body {
     text-align: center;
 }
 
+.thanks-line {
+    font-size: 18px;
+    font-weight: bold;
+    color: #06C755;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
 .question-note {
     font-size: 9px;
     color: #888;
