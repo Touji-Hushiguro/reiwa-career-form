@@ -26,7 +26,12 @@ var strengths = [
     { step: 8, title: '内定まで全てサポート',   emoji: '🤝' }
 ];
 
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbwvb-2dIF4ZT9QVk41nRaMgwIIbSEdwUnkErtyvbSDLgtHUTGvhoqxPlU0ZyHr1Xf0xRw/exec';
+// Vercel API (旧GAS Web App から移行)
+var API_BASE = 'https://reiwa-form-api.vercel.app';
+var FORM_URL = API_BASE + '/api/form';
+var SLOTS_URL = API_BASE + '/api/slots';
+// 後方互換用 (一部の form.action 等で使用)
+var GAS_URL = FORM_URL;
 
 var allSlotsCache = null;
 var quickSlotsCache = null;
@@ -174,10 +179,11 @@ window.sendOTP = function() {
     btn.disabled = true;
     btn.textContent = '送信中...';
 
-    var fd = new FormData();
-    fd.append('data', JSON.stringify({ action: 'sendOTP', phone: phone }));
-
-    fetch(GAS_URL, { method: 'POST', body: fd })
+    fetch(FORM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sendOTP', phone: phone })
+    })
         .then(function(res) {
             return res.text().then(function(text) {
                 try { return JSON.parse(text); }
@@ -221,10 +227,11 @@ window.verifyOTP = function() {
     btn.textContent = '認証中...';
     errEl.style.display = 'none';
 
-    var fd = new FormData();
-    fd.append('data', JSON.stringify({ action: 'verifyOTP', phone: phone, code: code }));
-
-    fetch(GAS_URL, { method: 'POST', body: fd })
+    fetch(FORM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verifyOTP', phone: phone, code: code })
+    })
         .then(function(res) {
             return res.text().then(function(text) {
                 try { return JSON.parse(text); }
@@ -312,7 +319,7 @@ var prefetchPromise = null;
 window.prefetchAllSlots = function() {
     if (allSlotsCache) return;
     if (prefetchPromise) return;
-    prefetchPromise = fetch(GAS_URL + '?action=all_slots&days=14&version=v2')
+    prefetchPromise = fetch(SLOTS_URL + '?action=all_slots&days=14&version=v2')
         .then(function(res) { return res.json(); })
         .then(function(json) {
             if (json.success && json.slots) {
@@ -339,7 +346,7 @@ window.fetchStep8Slots = function() {
     // プリフェッチ済みなら即初期化
     if (allSlotsCache) { initStep8V2(allSlotsCache); return; }
     // プリフェッチ中ならその完了を待つ
-    var promise = prefetchPromise || fetch(GAS_URL + '?action=all_slots&days=14&version=v2').then(function(res) { return res.json(); });
+    var promise = prefetchPromise || fetch(SLOTS_URL + '?action=all_slots&days=14&version=v2').then(function(res) { return res.json(); });
     promise
         .then(function(json) {
             if (allSlotsCache) { initStep8V2(allSlotsCache); return; }
