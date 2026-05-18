@@ -510,21 +510,14 @@ window.nextStep = function() {
         formData.birthDate = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         formData.prefecture = document.getElementById('prefecture').value;
 
-        var iframe1 = document.createElement('iframe');
-        iframe1.name = 'hidden_iframe_first';
-        iframe1.style.display = 'none';
-        document.body.appendChild(iframe1);
-        var form1 = document.createElement('form');
-        form1.method = 'POST';
-        form1.action = GAS_URL;
-        form1.target = 'hidden_iframe_first';
-        form1.style.display = 'none';
-        var input1 = document.createElement('textarea');
-        input1.name = 'data';
-        input1.value = JSON.stringify(Object.assign({}, formData, { action: 'firstSubmit' }));
-        form1.appendChild(input1);
-        document.body.appendChild(form1);
-        form1.submit();
+        // firstSubmit: 電話番号取得タイミングでスプシに行追加
+        // fetch + keepalive: ページ遷移後もリクエスト完了を保証
+        fetch(FORM_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({}, formData, { action: 'firstSubmit' })),
+            keepalive: true
+        }).catch(function(err) { console.warn('firstSubmit error:', err); });
     }
     document.getElementById('step' + currentStep).classList.add('hidden');
     currentStep++;
@@ -568,26 +561,16 @@ window.submitForm = function() {
 
     document.getElementById('step' + currentStep).classList.add('hidden');
 
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = GAS_URL;
-    form.target = 'hidden_iframe';
-    form.style.display = 'none';
+    // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
+    // fetch + keepalive: ページ遷移後もリクエスト完了を保証 (iframe より確実)
+    fetch(FORM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' })),
+        keepalive: true
+    }).catch(function(err) { console.warn('finalSubmit error:', err); });
 
-    var input = document.createElement('textarea');
-    input.name = 'data';
-    input.value = JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' }));
-    form.appendChild(input);
-
-    var iframe = document.createElement('iframe');
-    iframe.name = 'hidden_iframe';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    // サンクスページへリダイレクト（GASへの送信と並行して遷移）
+    // サンクスページへリダイレクト（送信処理と並行して遷移）
     setTimeout(function() {
         var isFv = location.pathname === '/fv' || location.pathname.indexOf('/fv/') === 0;
         window.location.href = '/thanks.html?v=' + (isFv ? 'fv' : 'ctrl');
