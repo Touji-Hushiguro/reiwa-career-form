@@ -715,7 +715,7 @@ body {
 /* LINE CTA (thanks.html) */
 .line-cta {
     margin-top: 32px;
-    padding: 28px 24px 0;
+    padding-top: 28px;
     border-top: 1px solid #e5e7eb;
     text-align: center;
 }
@@ -725,6 +725,7 @@ body {
     font-weight: 700;
     color: #111;
     margin-bottom: 14px;
+    padding: 0 24px;
 }
 
 .line-cta-text {
@@ -732,6 +733,7 @@ body {
     color: #555;
     line-height: 1.7;
     margin-bottom: 18px;
+    padding: 0 24px;
 }
 
 .line-cta-highlight {
@@ -743,6 +745,7 @@ body {
     font-size: 14px;
     color: #999;
     margin-bottom: 16px;
+    padding: 0 24px;
 }
 
 .btn-line {
