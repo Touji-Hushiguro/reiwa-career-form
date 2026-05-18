@@ -772,3 +772,149 @@ body {
         font-size: 14px;
     }
 }
+
+/* ============================================================ */
+/* v2 (/v2/) 限定スタイル — Step 8 新UI                          */
+/* ============================================================ */
+
+/* 「今すぐ相談する」CTA */
+.btn-instant {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 18px 16px;
+    background: linear-gradient(135deg, #Fee858 0%, #ffdb5c 50%, #ffcc3d 100%);
+    color: #333;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(255, 204, 61, 0.45);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    margin-bottom: 8px;
+}
+.btn-instant:hover {
+    box-shadow: 0 4px 12px rgba(255, 204, 61, 0.35);
+}
+.btn-instant:active {
+    transform: translateY(1px);
+}
+.btn-instant.selected {
+    outline: 3px solid #f59e0b;
+    outline-offset: -3px;
+}
+.btn-instant-icon {
+    font-size: 22px;
+}
+.btn-instant-note {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    margin: 0 0 20px;
+}
+
+.v2-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 16px 0 20px;
+}
+
+.v2-section {
+    margin-bottom: 20px;
+}
+.v2-section-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+/* 日付ボタン (今日 / 明日) */
+.v2-date-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.v2-date-btn {
+    padding: 14px 8px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+    line-height: 1.35;
+}
+.v2-date-btn:hover {
+    border-color: #ffcc3d;
+}
+.v2-date-btn.selected {
+    border-color: #f59e0b;
+    background: #fff7e0;
+}
+.v2-date-btn-sub {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* その他の日付 小さめプルダウン */
+.v2-other-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.v2-other-date-label {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+}
+.v2-select-sm {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    color: #333;
+    max-width: 200px;
+}
+
+/* 時間 / 分 プルダウン (横並び) */
+.v2-time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.v2-time-col .v2-section-label {
+    margin-bottom: 6px;
+}
+.v2-select {
+    width: 100%;
+    padding: 12px 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    background: white;
+    font-size: 16px;
+    color: #333;
+}
+.v2-select:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+.v2-time-note {
+    font-size: 12px;
+    color: #f97316;
+    margin: 8px 0 0;
+}

@@ -9,13 +9,35 @@ var SPREADSHEET_ID = '1Vq0uK-w9M4EKft3l1TyzNz06yPrhtTTovH0Nb7inM1w';
 var SHEET_NAME     = '顧客データDB';
 var SLACK_URL      = 'YOUR_SLACK_WEBHOOK_URL'; // GASエディタ上で実際のURLに書き換えてください
 
-// カレンダー連携設定
+// カレンダー連携設定（共通）
 var CALENDAR_ID        = 'box-reiwa_reservation@box-hr.co.jp';
 var TZ                 = 'Asia/Tokyo';
-var SLOT_MINUTES       = 15;        // 1枠の長さ
-var BUSINESS_START_HOUR = 11;       // 営業開始時刻
-var BUSINESS_END_HOUR   = 20;       // 営業終了時刻（20時ちょうどで終了→最終枠は19:45-20:00）
-var LEAD_TIME_MINUTES  = 30;        // 現在時刻から何分後以降を候補にするか
+var SLOT_MINUTES       = 15;        // 1枠の長さ（v1/v2共通）
+
+// バージョン別設定（v2はファーストビューA/B検証用の新UI）
+// v1: 既存LP (entry.reiwa-career.com/)
+// v2: 新UI (entry.reiwa-career.com/v2/) — 営業時間拡張・リードタイム短縮・1枠3件まで
+var CONFIG_V1 = {
+  BUSINESS_START_HOUR: 11,
+  BUSINESS_END_HOUR:   20,
+  LEAD_TIME_MINUTES:   30,
+  MAX_PER_SLOT:        1
+};
+var CONFIG_V2 = {
+  BUSINESS_START_HOUR: 10,
+  BUSINESS_END_HOUR:   20,
+  LEAD_TIME_MINUTES:   15,
+  MAX_PER_SLOT:        3
+};
+
+function getConfig(version) {
+  return version === 'v2' ? CONFIG_V2 : CONFIG_V1;
+}
+
+// 後方互換: 既存コードが直接参照していた定数を v1 デフォルトで残す
+var BUSINESS_START_HOUR = CONFIG_V1.BUSINESS_START_HOUR;
+var BUSINESS_END_HOUR   = CONFIG_V1.BUSINESS_END_HOUR;
+var LEAD_TIME_MINUTES   = CONFIG_V1.LEAD_TIME_MINUTES;
 
 var MAIL_CONFIG = {
   SENDER_NAME:   '【送信専用】れいわキャリアお問い合わせ窓口',
@@ -60,12 +82,20 @@ var TOTAL_COLS = 17;
 function doGet(e) {
   try {
     var action = (e && e.parameter && e.parameter.action) || 'quick_slots';
+    var version = (e && e.parameter && e.parameter.version) || 'v1';
+    var config = getConfig(version);
     var result;
     if (action === 'all_slots') {
       var days = parseInt((e && e.parameter && e.parameter.days) || '14', 10);
-      result = getAllAvailableSlots(days);
+      result = getAllAvailableSlots(days, config);
+    } else if (action === 'instantSlot') {
+      // v2「今すぐ相談する」用: 直近14日で最も早い空き枠を1つ返す
+      result = getInstantSlot(config);
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, slot: result }))
+        .setMimeType(ContentService.MimeType.JSON);
     } else {
-      result = getQuickSlots();
+      result = getQuickSlots(config);
     }
     return ContentService
       .createTextOutput(JSON.stringify({ success: true, slots: result }))
@@ -79,24 +109,26 @@ function doGet(e) {
 }
 
 // 今日・明日・明後日 から「最も早い空き15分枠」を1つずつ返す
-function getQuickSlots() {
+function getQuickSlots(config) {
+  config = config || CONFIG_V1;
   var now = new Date();
   var results = [];
   for (var i = 0; i < 3; i++) {
     var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    var slot = findEarliestSlotOfDay(day, now);
+    var slot = findEarliestSlotOfDay(day, now, config);
     if (slot) results.push(slot);
   }
   return results;
 }
 
 // 指定日数分の全15分空き枠を返す（「その他」用）
-function getAllAvailableSlots(days) {
+function getAllAvailableSlots(days, config) {
+  config = config || CONFIG_V1;
   var now = new Date();
   var results = [];
   for (var i = 0; i < days; i++) {
     var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    var daySlots = findAllSlotsOfDay(day, now);
+    var daySlots = findAllSlotsOfDay(day, now, config);
     for (var j = 0; j < daySlots.length; j++) {
       results.push(daySlots[j]);
     }
@@ -104,22 +136,35 @@ function getAllAvailableSlots(days) {
   return results;
 }
 
+// v2「今すぐ相談する」用: 直近14日で最も早い空き枠を1つ返す
+function getInstantSlot(config) {
+  config = config || CONFIG_V1;
+  var now = new Date();
+  for (var i = 0; i < 14; i++) {
+    var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    var slot = findEarliestSlotOfDay(day, now, config);
+    if (slot) return slot;
+  }
+  return null;
+}
+
 // 指定日の最も早い空き枠を返す
-function findEarliestSlotOfDay(day, now) {
-  var slots = findAllSlotsOfDay(day, now);
+function findEarliestSlotOfDay(day, now, config) {
+  var slots = findAllSlotsOfDay(day, now, config);
   return slots.length > 0 ? slots[0] : null;
 }
 
 // 指定日の全空き枠を返す（昇順）
-function findAllSlotsOfDay(day, now) {
+function findAllSlotsOfDay(day, now, config) {
+  config = config || CONFIG_V1;
   var cal = CalendarApp.getCalendarById(CALENDAR_ID);
   if (!cal) throw new Error('カレンダーが見つかりません: ' + CALENDAR_ID);
 
-  var dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), BUSINESS_START_HOUR, 0, 0);
-  var dayEnd   = new Date(day.getFullYear(), day.getMonth(), day.getDate(), BUSINESS_END_HOUR, 0, 0);
+  var dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), config.BUSINESS_START_HOUR, 0, 0);
+  var dayEnd   = new Date(day.getFullYear(), day.getMonth(), day.getDate(), config.BUSINESS_END_HOUR, 0, 0);
 
   // リードタイムを考慮した「候補にできる最も早い時刻」
-  var earliestStart = new Date(now.getTime() + LEAD_TIME_MINUTES * 60 * 1000);
+  var earliestStart = new Date(now.getTime() + config.LEAD_TIME_MINUTES * 60 * 1000);
   // SLOT_MINUTES単位に切り上げ
   earliestStart.setSeconds(0, 0);
   var remainder = earliestStart.getMinutes() % SLOT_MINUTES;
@@ -138,7 +183,7 @@ function findAllSlotsOfDay(day, now) {
   var cursor = new Date(scanStart.getTime());
   while (cursor.getTime() + SLOT_MINUTES * 60 * 1000 <= dayEnd.getTime()) {
     var slotEnd = new Date(cursor.getTime() + SLOT_MINUTES * 60 * 1000);
-    if (!isOverlapping(cursor, slotEnd, events)) {
+    if (!isOverlapping(cursor, slotEnd, events, config.MAX_PER_SLOT)) {
       result.push(formatSlot(cursor, slotEnd));
     }
     cursor = new Date(cursor.getTime() + SLOT_MINUTES * 60 * 1000);
@@ -146,7 +191,11 @@ function findAllSlotsOfDay(day, now) {
   return result;
 }
 
-function isOverlapping(slotStart, slotEnd, events) {
+// 同一15分枠への重複予約は MAX_PER_SLOT 件まで許容
+// 終日イベントは常にブロック扱い
+function isOverlapping(slotStart, slotEnd, events, maxPerSlot) {
+  maxPerSlot = maxPerSlot || 1;
+  var count = 0;
   for (var i = 0; i < events.length; i++) {
     var ev = events[i];
     var evStart = ev.getStartTime();
@@ -154,7 +203,8 @@ function isOverlapping(slotStart, slotEnd, events) {
     // 終日イベントは営業時間全体をブロックとみなす
     if (ev.isAllDayEvent && ev.isAllDayEvent()) return true;
     if (slotStart.getTime() < evEnd.getTime() && slotEnd.getTime() > evStart.getTime()) {
-      return true;
+      count++;
+      if (count >= maxPerSlot) return true;
     }
   }
   return false;
@@ -304,7 +354,7 @@ function findRowByPhone(sheet, phone) {
 
 // ============================================================
 // カレンダーイベント作成（finalSubmitで呼ばれる）
-// ダブルブッキング許容: 空き状況チェックなしで強制作成
+// version別の MAX_PER_SLOT を超えていたら作成スキップ（race condition対策）
 // ============================================================
 
 function createInterviewEvent(data) {
@@ -318,11 +368,33 @@ function createInterviewEvent(data) {
   }
   var startDate = new Date(data.interviewStart);
   var endDate   = new Date(data.interviewEnd);
+
+  // version別の枠上限チェック（race condition対策）
+  var config = getConfig(data.version);
+  var existingEvents = cal.getEvents(startDate, endDate);
+  var overlapCount = 0;
+  for (var i = 0; i < existingEvents.length; i++) {
+    var ev = existingEvents[i];
+    if (ev.isAllDayEvent && ev.isAllDayEvent()) continue;
+    var evStart = ev.getStartTime();
+    var evEnd   = ev.getEndTime();
+    if (startDate.getTime() < evEnd.getTime() && endDate.getTime() > evStart.getTime()) {
+      overlapCount++;
+    }
+  }
+  if (overlapCount >= config.MAX_PER_SLOT) {
+    Logger.log('⚠️ 枠満杯のためカレンダー登録スキップ: version=' + (data.version || 'v1') +
+               ' slot=' + Utilities.formatDate(startDate, TZ, 'yyyy/MM/dd HH:mm') +
+               ' existing=' + overlapCount + ' max=' + config.MAX_PER_SLOT);
+    return;
+  }
+
   var name = data.fullName || 'お客様';
   var title = '【架電】' + name + '様 予約用カレンダー';
   var description = buildEventDescription(data);
   cal.createEvent(title, startDate, endDate, { description: description });
-  Logger.log('✅ カレンダー登録: ' + title + ' @ ' + Utilities.formatDate(startDate, TZ, 'yyyy/MM/dd HH:mm'));
+  Logger.log('✅ カレンダー登録: ' + title + ' @ ' + Utilities.formatDate(startDate, TZ, 'yyyy/MM/dd HH:mm') +
+             ' (version=' + (data.version || 'v1') + ', existing=' + overlapCount + '/' + config.MAX_PER_SLOT + ')');
 }
 
 function buildEventDescription(data) {
