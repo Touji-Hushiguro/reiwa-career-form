@@ -573,14 +573,19 @@ window.nextStep = function() {
         formData.birthDate = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         formData.prefecture = document.getElementById('prefecture').value;
 
-        // firstSubmit: 電話番号取得タイミングでスプシに行追加
-        // fetch + keepalive: ページ遷移後もリクエスト完了を保証
+        // firstSubmit: 行番号を sessionStorage に保存 → finalSubmit で送り返して同一行update
         fetch(FORM_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.assign({}, formData, { action: 'firstSubmit' })),
             keepalive: true
-        }).catch(function(err) { console.warn('firstSubmit error:', err); });
+        }).then(function(res) { return res.json(); })
+          .then(function(json) {
+              if (json && json.rowIndex && json.rowIndex > 1) {
+                  try { sessionStorage.setItem('formRowIndex', String(json.rowIndex)); } catch(e) {}
+              }
+          })
+          .catch(function(err) { console.warn('firstSubmit error:', err); });
     }
     document.getElementById('step' + currentStep).classList.add('hidden');
     currentStep++;
@@ -624,12 +629,13 @@ window.submitForm = function() {
 
     document.getElementById('step' + currentStep).classList.add('hidden');
 
-    // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
-    // fetch + keepalive で送信（5/20 まで動いていた構成）
+    // finalSubmit: sessionStorage の rowIndex を送って同一行update
+    var savedRowIndex = 0;
+    try { savedRowIndex = parseInt(sessionStorage.getItem('formRowIndex') || '0', 10); } catch(e) {}
     fetch(FORM_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' })),
+        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit', rowIndex: savedRowIndex })),
         keepalive: true
     }).catch(function(err) { console.warn('finalSubmit error:', err); });
 
