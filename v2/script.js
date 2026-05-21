@@ -625,13 +625,22 @@ window.submitForm = function() {
     document.getElementById('step' + currentStep).classList.add('hidden');
 
     // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
-    // fetch + keepalive: ページ遷移後もリクエスト完了を保証 (iframe より確実)
-    fetch(FORM_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' })),
-        keepalive: true
-    }).catch(function(err) { console.warn('finalSubmit error:', err); });
+    // sendBeacon: ページ遷移後でも確実にPOSTを完遂する（fetch+keepaliveより信頼性高い）
+    var finalPayload = JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' }));
+    var sent = false;
+    if (navigator.sendBeacon) {
+        var blob = new Blob([finalPayload], { type: 'application/json' });
+        sent = navigator.sendBeacon(FORM_URL, blob);
+    }
+    if (!sent) {
+        // sendBeacon 非対応 or 失敗時のフォールバック
+        fetch(FORM_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: finalPayload,
+            keepalive: true
+        }).catch(function(err) { console.warn('finalSubmit error:', err); });
+    }
 
     // サンクスページへリダイレクト（送信処理と並行して遷移）
     setTimeout(function() {
