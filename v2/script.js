@@ -625,18 +625,18 @@ window.submitForm = function() {
     document.getElementById('step' + currentStep).classList.add('hidden');
 
     // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
-    // sendBeacon: ページ遷移後でも確実にPOSTを完遂する（fetch+keepaliveより信頼性高い）
+    // sendBeacon は CORS simple request の関係で text/plain しか受け付けない (application/json は silent fail する)
     var finalPayload = JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' }));
     var sent = false;
     if (navigator.sendBeacon) {
-        var blob = new Blob([finalPayload], { type: 'application/json' });
+        var blob = new Blob([finalPayload], { type: 'text/plain;charset=UTF-8' });
         sent = navigator.sendBeacon(FORM_URL, blob);
     }
     if (!sent) {
         // sendBeacon 非対応 or 失敗時のフォールバック
         fetch(FORM_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
             body: finalPayload,
             keepalive: true
         }).catch(function(err) { console.warn('finalSubmit error:', err); });
