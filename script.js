@@ -562,22 +562,13 @@ window.submitForm = function() {
     document.getElementById('step' + currentStep).classList.add('hidden');
 
     // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
-    // sendBeacon は CORS simple request の関係で text/plain しか受け付けない (application/json は silent fail する)
-    var finalPayload = JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' }));
-    var sent = false;
-    if (navigator.sendBeacon) {
-        var blob = new Blob([finalPayload], { type: 'text/plain;charset=UTF-8' });
-        sent = navigator.sendBeacon(FORM_URL, blob);
-    }
-    if (!sent) {
-        // sendBeacon 非対応 or 失敗時のフォールバック
-        fetch(FORM_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-            body: finalPayload,
-            keepalive: true
-        }).catch(function(err) { console.warn('finalSubmit error:', err); });
-    }
+    // fetch + keepalive で送信（5/20 まで動いていた構成）
+    fetch(FORM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit' })),
+        keepalive: true
+    }).catch(function(err) { console.warn('finalSubmit error:', err); });
 
     // サンクスページへリダイレクト（送信処理と並行して遷移）
     setTimeout(function() {
