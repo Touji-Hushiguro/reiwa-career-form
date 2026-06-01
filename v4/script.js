@@ -583,28 +583,49 @@ window.submitForm = function() {
 
     document.getElementById('step' + currentStep).classList.add('hidden');
 
-    // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
-    // sessionStorage の rowIndex を送って、Vercel が直接同一行をupdateできるように
-    var savedRowIndex = 0;
-    try { savedRowIndex = parseInt(sessionStorage.getItem('formRowIndex') || '0', 10); } catch(e) {}
-    fetch(FORM_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit', rowIndex: savedRowIndex })),
-        keepalive: true
-    }).catch(function(err) { console.warn('finalSubmit error:', err); });
+    // 「送信中…」ローディング表示 (Slack/Cal通知完了まで)
+    var loadingEl = document.getElementById('formLoading');
+    if (!loadingEl) {
+        loadingEl = document.createElement('div');
+        loadingEl.id = 'formLoading';
+        loadingEl.style.cssText = 'padding:60px 24px;text-align:center;font-size:16px;color:#333;';
+        loadingEl.textContent = '送信中…';
+        var formContent = document.getElementById('formContent');
+        if (formContent) formContent.appendChild(loadingEl);
+    }
+    loadingEl.style.display = 'block';
 
-    // 面談情報を sessionStorage に保存 → v4/thanks.html で表示
+    // 面談情報を sessionStorage に保存 → v4/thanks.html で表示 (遷移前に必ず保存)
     try {
         sessionStorage.setItem('v4_interview_label', sel.label || '');
         sessionStorage.setItem('v4_interview_start', sel.start || '');
         sessionStorage.setItem('v4_interview_end', sel.end || '');
     } catch (e) {}
 
-    // v4 専用サンクスページへリダイレクト（送信処理と並行して遷移）
-    setTimeout(function() {
+    // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
+    // sessionStorage の rowIndex を送って、Vercel が直接同一行をupdateできるように
+    var savedRowIndex = 0;
+    try { savedRowIndex = parseInt(sessionStorage.getItem('formRowIndex') || '0', 10); } catch(e) {}
+
+    // 二重遷移防止 + 遷移関数
+    var navigated = false;
+    function goToThanks() {
+        if (navigated) return;
+        navigated = true;
         window.location.href = 'thanks.html?v=v4';
-    }, 300);
+    }
+
+    // fetch のレスポンスを待ってから遷移 → Slack/Cal通知が確実に完了
+    fetch(FORM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit', rowIndex: savedRowIndex })),
+        keepalive: true
+    }).then(function() { goToThanks(); })
+      .catch(function(err) { console.warn('finalSubmit error:', err); goToThanks(); });
+
+    // 8秒でフォールバック (異常時の最終保険)
+    setTimeout(goToThanks, 8000);
 };
 
 // ========== UTM パラメータキャプチャ ==========

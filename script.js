@@ -583,22 +583,44 @@ window.submitForm = function() {
 
     document.getElementById('step' + currentStep).classList.add('hidden');
 
+    // 「送信中…」のシンプルなローディング表示 (Slack/Cal通知完了まで)
+    var loadingEl = document.getElementById('formLoading');
+    if (!loadingEl) {
+        loadingEl = document.createElement('div');
+        loadingEl.id = 'formLoading';
+        loadingEl.style.cssText = 'padding:60px 24px;text-align:center;font-size:16px;color:#333;';
+        loadingEl.textContent = '送信中…';
+        var formContent = document.getElementById('formContent');
+        if (formContent) formContent.appendChild(loadingEl);
+    }
+    loadingEl.style.display = 'block';
+
     // finalSubmit: スプシ更新+カレンダー登録+Slack通知+メール
     // sessionStorage の rowIndex を送って、Vercel が直接同一行をupdateできるように
     var savedRowIndex = 0;
     try { savedRowIndex = parseInt(sessionStorage.getItem('formRowIndex') || '0', 10); } catch(e) {}
+
+    // 二重遷移防止フラグ + 遷移関数
+    var navigated = false;
+    function goToThanks() {
+        if (navigated) return;
+        navigated = true;
+        var isFv = location.pathname === '/fv' || location.pathname.indexOf('/fv/') === 0;
+        window.location.href = '/thanks.html?v=' + (isFv ? 'fv' : 'ctrl');
+    }
+
+    // fetch のレスポンスを待ってから遷移 → Slack/Cal 通知が確実に完了する
+    // keepalive: 万一ユーザーが先にタブを閉じてもサーバー送信を継続
     fetch(FORM_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit', rowIndex: savedRowIndex })),
         keepalive: true
-    }).catch(function(err) { console.warn('finalSubmit error:', err); });
+    }).then(function() { goToThanks(); })
+      .catch(function(err) { console.warn('finalSubmit error:', err); goToThanks(); });
 
-    // サンクスページへリダイレクト（送信処理と並行して遷移）
-    setTimeout(function() {
-        var isFv = location.pathname === '/fv' || location.pathname.indexOf('/fv/') === 0;
-        window.location.href = '/thanks.html?v=' + (isFv ? 'fv' : 'ctrl');
-    }, 300);
+    // 8秒でフォールバック遷移 (API応答が異常に遅い場合の最終保険)
+    setTimeout(goToThanks, 8000);
 };
 
 // ========== UTM パラメータキャプチャ ==========
