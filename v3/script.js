@@ -287,19 +287,25 @@ window.v3SubmitAndComplete = function() {
     formData.interviewEnd = '';
 
     // finalSubmit (rowIndex=0 → backend が writeNewRow + Slack)
+    // fetch のレスポンスを待ってから遷移 → Slack通知が確実に完了する (v1/v2/v4と同じ設計)
+    var navigated = false;
+    function goToThanks() {
+        if (navigated) return;
+        navigated = true;
+        // thanks.html (別ページ) へ遷移することで GTM のページビュートリガーが発火 → CV 計測される
+        window.location.href = '/v3/thanks.html';
+    }
+
     fetch(FORM_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.assign({}, formData, { action: 'finalSubmit', rowIndex: 0, version: 'v3' })),
         keepalive: true
-    }).catch(function(err) { console.warn('v3 finalSubmit error:', err); });
+    }).then(function() { goToThanks(); })
+      .catch(function(err) { console.warn('v3 finalSubmit error:', err); goToThanks(); });
 
-    // 即完了画面表示 (送信は裏で並行)
-    document.getElementById('step6').classList.add('hidden');
-    document.getElementById('completion').classList.remove('hidden');
-    // プログレスバーを 100% に
-    document.getElementById('progressBar').style.width = '100%';
-    document.getElementById('formContent').scrollTop = 0;
+    // 8秒でフォールバック遷移 (API応答が異常に遅い場合の最終保険)
+    setTimeout(goToThanks, 8000);
 };
 
 window.backToPhoneInput = function() {
