@@ -154,7 +154,7 @@ window.validateStep5 = function() {
     var val = converted.trim();
     // カタカナ（全角）+ スペース（半角/全角）+ 長音符 + 中黒 のみ許可
     var kanaRegex = /^[\u30A0-\u30FF\u3000\s・]+$/;
-    var isValid = val !== '' && kanaRegex.test(val);
+    var isValid = val.length >= 2 && kanaRegex.test(val); // 1文字を弾く
 
     var err = document.getElementById('fullNameError');
     if (val !== '' && !isValid) {
