@@ -607,12 +607,6 @@ window.submitForm = function() {
     var savedRowIndex = 0;
     try { savedRowIndex = parseInt(sessionStorage.getItem('formRowIndex') || '0', 10); } catch(e) {}
 
-    // GTM コンバージョンイベント発火 (Media: Meta/GAds/TikTok)
-    try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ event: 'sflp_booking_complete' });
-    } catch (e) {}
-
     // 二重遷移防止 + 遷移関数
     var navigated = false;
     function goToThanks() {
