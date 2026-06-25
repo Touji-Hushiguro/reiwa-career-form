@@ -308,7 +308,7 @@ window.initializeBirthDateSelects = function() {
     var y = document.getElementById('birthYear');
     var m = document.getElementById('birthMonth');
     var d = document.getElementById('birthDay');
-    for (var yr = 2005; yr >= 1993; yr--) {
+    for (var yr = new Date().getFullYear() - 18; yr >= 1997; yr--) {
         var o = document.createElement('option');
         o.value = yr;
         o.textContent = yr + '年';
