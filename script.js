@@ -75,7 +75,7 @@ window.validateStep3 = function() {
         if (errEl) errEl.style.display = 'none';
         return;
     }
-    // 21歳未満は応募不可
+    // 20歳未満は応募不可
     var birth = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
     var today = new Date();
     var age = today.getFullYear() - birth.getFullYear();
@@ -83,7 +83,7 @@ window.validateStep3 = function() {
         (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) {
         age--;
     }
-    if (age < 21) {
+    if (age < 20) {
         if (errEl) errEl.style.display = 'block';
         return;
     }
@@ -307,7 +307,7 @@ window.initializeBirthDateSelects = function() {
     var y = document.getElementById('birthYear');
     var m = document.getElementById('birthMonth');
     var d = document.getElementById('birthDay');
-    for (var yr = new Date().getFullYear() - 18; yr >= 1997; yr--) {
+    for (var yr = new Date().getFullYear() - 20; yr >= 1997; yr--) {
         var o = document.createElement('option');
         o.value = yr;
         o.textContent = yr + '年';
