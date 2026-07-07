@@ -581,6 +581,13 @@ window.submitForm = function() {
     formData.interviewStart = sel.start;
     formData.interviewEnd = sel.end;
 
+    // 面談情報を sessionStorage に保存 → thanks.html で表示 (遷移前に必ず保存)
+    try {
+        sessionStorage.setItem('v4_interview_label', sel.label || '');
+        sessionStorage.setItem('v4_interview_start', sel.start || '');
+        sessionStorage.setItem('v4_interview_end', sel.end || '');
+    } catch (e) {}
+
     document.getElementById('step' + currentStep).classList.add('hidden');
 
     // 「送信中…」のシンプルなローディング表示 (Slack/Cal通知完了まで)
