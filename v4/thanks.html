@@ -10,322 +10,318 @@
     <link rel="stylesheet" href="../style.css?v=20260528a">
     <style>
         /* ========================================================
-           v4 thanks page 専用スタイル (れいわ緑 #06C755 基調)
+           v4 thanks page — refined design (れいわ緑 #06C755 基調)
            ======================================================== */
         :root {
-            --reiwa-green: #06C755;
-            --reiwa-green-dark: #04a346;
-            --reiwa-green-bg: #e8f8ee;
-            --reiwa-green-border: #c5ebd2;
-            --text-dark: #1f2d2a;
-            --text-mid: #555;
-            --text-light: #888;
+            --green: #06C755;
+            --green-deep: #04a346;
+            --green-ink: #0a833f;
+            --tint: #eef8f2;
+            --tint-soft: #f7fbf9;
+            --ink: #17241f;
+            --body: #4b5a54;
+            --muted: #8a978f;
+            --line: #e6efe9;
+            --shadow-sm: 0 1px 2px rgba(16,40,32,.04), 0 4px 14px rgba(16,40,32,.05);
+            --shadow-md: 0 2px 4px rgba(16,40,32,.05), 0 10px 30px rgba(16,40,32,.07);
+        }
+
+        /* ページ全体のトーン調整 (thanks 専用オーバーライド) */
+        .container {
+            box-shadow: 0 24px 70px rgba(20,40,30,.18);
+        }
+        .footer a {
+            color: var(--green-ink);
         }
 
         .v4-thanks-wrap {
             max-width: 480px;
             margin: 0 auto;
-            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', sans-serif;
-            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* THANK YOU 見出し */
-        .v4-thanks-hero {
-            padding: 40px 24px 8px;
+        /* ===== Hero (完了メッセージ) ===== */
+        .v4-hero {
             text-align: center;
+            padding: 44px 24px 8px;
         }
-        .v4-thanks-hero-title {
-            display: inline-block;
-            font-size: 32px;
-            font-weight: 900;
-            letter-spacing: 0.04em;
-            background: linear-gradient(transparent 55%, var(--reiwa-green) 55%);
-            padding: 0 8px;
-            color: var(--text-dark);
+        .v4-hero-badge {
+            width: 66px;
+            height: 66px;
+            margin: 0 auto 22px;
+            display: block;
+            animation: v4pop .55s cubic-bezier(.2,.8,.3,1.2) both;
+        }
+        .v4-hero-eyebrow {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .3em;
+            color: var(--green-ink);
+            text-indent: .3em;
+            margin-bottom: 14px;
+        }
+        .v4-hero-title {
+            font-size: 25px;
+            font-weight: 800;
+            line-height: 1.4;
+            letter-spacing: .01em;
+            color: var(--ink);
+            margin: 0 0 14px;
+        }
+        .v4-hero-lead {
+            font-size: 13.5px;
+            color: var(--body);
+            line-height: 1.7;
             margin: 0;
         }
 
-        .v4-thanks-sub {
-            text-align: center;
-            font-size: 20px;
-            font-weight: 700;
-            margin: 24px 0 8px;
-            display: inline-block;
-            width: 100%;
+        @keyframes v4pop {
+            0%   { transform: scale(.6); opacity: 0; }
+            60%  { transform: scale(1.04); }
+            100% { transform: scale(1); opacity: 1; }
         }
-        .v4-thanks-sub-text {
-            display: inline-block;
-            border-bottom: 3px solid var(--reiwa-green);
-            padding-bottom: 4px;
+        @media (prefers-reduced-motion: reduce) {
+            .v4-hero-badge { animation: none; }
         }
 
-        .v4-thanks-lead {
-            text-align: center;
-            color: var(--text-mid);
-            font-size: 13px;
-            margin: 0 24px 16px;
-        }
-
-        /* 予約情報テーブル */
-        .v4-info-card {
-            border: 1px solid var(--reiwa-green-border);
-            border-radius: 12px;
-            margin: 0 20px 16px;
-            padding: 8px 16px;
+        /* ===== 予約情報カード ===== */
+        .v4-info {
             background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            margin: 26px 22px 0;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
         }
         .v4-info-row {
             display: flex;
-            padding: 14px 0;
-            border-bottom: 1px solid #eef5f1;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--line);
             font-size: 14px;
         }
         .v4-info-row:last-child {
             border-bottom: none;
         }
         .v4-info-key {
-            flex: 0 0 90px;
-            color: var(--text-light);
-            font-weight: 500;
+            flex: 0 0 92px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 13px;
         }
         .v4-info-val {
             flex: 1;
+            color: var(--ink);
             font-weight: 700;
-            color: var(--text-dark);
         }
 
-        .v4-thanks-note {
-            margin: 0 24px 32px;
-            font-size: 11px;
-            color: var(--text-light);
-            line-height: 1.7;
+        .v4-note {
+            margin: 16px 24px 4px;
+            font-size: 11.5px;
+            color: var(--muted);
+            line-height: 1.85;
         }
 
-        /* セクション (転職エージェント/未経験OK/無料サポート) */
+        /* ===== セクション共通 ===== */
         .v4-section {
-            padding: 40px 20px;
+            padding: 46px 22px;
+            margin-top: 40px;
         }
-        .v4-section--mint {
-            background: var(--reiwa-green-bg);
+        .v4-section--tint {
+            background: var(--tint);
         }
         .v4-section--white {
             background: #fff;
         }
-        .v4-section-tag {
-            display: inline-block;
-            background: #1f2d2a;
-            color: var(--reiwa-green);
-            padding: 4px 16px;
-            font-weight: 800;
-            font-size: 15px;
-            letter-spacing: 0.04em;
-        }
-        .v4-section-tag-wrap {
+        .v4-section-head {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 26px;
+        }
+        .v4-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 15px;
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--green-ink);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            box-shadow: var(--shadow-sm);
+        }
+        .v4-eyebrow::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+        .v4-section--tint .v4-eyebrow {
+            background: #fff;
         }
         .v4-section-title {
-            text-align: center;
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 800;
             line-height: 1.5;
-            margin: 8px 0 24px;
-            color: var(--text-dark);
+            color: var(--ink);
+            margin: 14px 0 0;
         }
 
-        /* 転職エージェント (アドバイザー カード) */
+        /* ===== 転職エージェント (アドバイザー) ===== */
         .v4-advisors {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 16px;
+            gap: 12px;
         }
         .v4-advisor {
             background: #fff;
-            border: 1px solid var(--reiwa-green-border);
+            border: 1px solid var(--line);
             border-radius: 16px;
-            padding: 16px 4px;
+            padding: 18px 6px;
             text-align: center;
-            overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
-        .v4-advisor-avatar {
-            width: 76px;
-            height: 76px;
+        .v4-advisor-av {
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: var(--reiwa-green-bg);
-            display: inline-block;
             overflow: hidden;
-            margin-bottom: 8px;
+            margin: 0 auto 10px;
+            background: var(--tint);
+            box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--line);
         }
-        .v4-advisor-avatar img {
+        .v4-advisor-av img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: center 15%;
         }
-        .v4-advisor-name {
-            font-size: 12px;
+        .v4-advisor-nm {
+            font-size: 13px;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--ink);
         }
 
-        /* FAQ */
+        /* ===== FAQ ===== */
         .v4-faq-title {
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
-            margin: 40px 0 24px;
+            color: var(--ink);
+            margin: 0 0 26px;
         }
         .v4-faq-list {
-            padding: 0 20px;
+            padding: 0 2px;
         }
         .v4-faq-item {
             background: #fff;
-            border: 1.5px solid var(--reiwa-green-border);
-            border-radius: 12px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
             padding: 18px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
         }
-        .v4-faq-question {
+        .v4-faq-item:last-child {
+            margin-bottom: 0;
+        }
+        .v4-faq-q {
             display: flex;
             align-items: flex-start;
             gap: 12px;
             font-weight: 700;
             font-size: 15px;
-            color: var(--text-dark);
-            margin-bottom: 10px;
+            line-height: 1.5;
+            color: var(--ink);
         }
-        .v4-faq-q-icon {
-            flex: 0 0 32px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--reiwa-green);
+        .v4-faq-q-ic {
+            flex: 0 0 26px;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: var(--green);
             color: #fff;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
             font-size: 14px;
+            margin-top: 1px;
         }
-        .v4-faq-answer {
-            font-size: 13px;
-            color: var(--text-mid);
-            line-height: 1.7;
-            padding-left: 44px;
-        }
-
-        /* 未経験OK 動画サムネ */
-        .v4-videos {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .v4-video {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #ccc;
-            aspect-ratio: 9 / 16;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .v4-video-placeholder {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #d4e9d8, #b8dcc4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--reiwa-green-dark);
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .v4-video-play {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--reiwa-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
-        .v4-video-play::after {
-            content: '';
-            width: 0;
-            height: 0;
-            border-left: 9px solid #fff;
-            border-top: 6px solid transparent;
-            border-bottom: 6px solid transparent;
-            margin-left: 3px;
+        .v4-faq-a {
+            font-size: 13.5px;
+            color: var(--body);
+            line-height: 1.85;
+            padding-left: 38px;
+            margin: 10px 0 0;
         }
 
-        /* 無料サポート (4枚カード) */
-        .v4-support-list {
+        /* ===== 無料サポート ===== */
+        .v4-support {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
-            margin-top: 8px;
+            gap: 12px;
         }
         .v4-support-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 18px;
             display: flex;
             align-items: center;
-            gap: 14px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        }
-        .v4-support-card.left .v4-support-icon {
-            order: 1;
-        }
-        .v4-support-card.left .v4-support-text {
-            order: 2;
-        }
-        .v4-support-card.right .v4-support-text {
-            order: 1;
-            text-align: right;
-        }
-        .v4-support-card.right .v4-support-icon {
-            order: 2;
-        }
-        .v4-support-icon {
-            flex: 0 0 80px;
-            width: 80px;
-            height: 80px;
+            gap: 16px;
+            background: #fff;
+            border: 1px solid var(--line);
             border-radius: 16px;
-            background: var(--reiwa-green-bg);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .v4-support-ic {
+            flex: 0 0 56px;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: var(--tint);
+            color: var(--green-deep);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 38px;
         }
-        .v4-support-text {
+        .v4-support-ic svg {
+            width: 30px;
+            height: 30px;
+        }
+        .v4-support-tx {
             flex: 1;
             font-size: 15px;
-            font-weight: 800;
-            line-height: 1.5;
-            color: var(--text-dark);
+            font-weight: 700;
+            line-height: 1.55;
+            color: var(--ink);
         }
 
-        /* LINE CTA (既存スタイルと併用) */
+        /* ===== LINE CTA (thanks 専用の微調整) ===== */
         .v4-line-section {
-            padding: 32px 20px 8px;
+            padding: 46px 22px 8px;
             background: #fff;
         }
         .v4-line-section .line-cta {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
             text-align: center;
         }
+        .v4-line-section .line-cta-free {
+            letter-spacing: .12em;
+        }
         .v4-line-section .btn-line {
-            display: inline-flex;
-            margin: 0 auto;
+            display: flex;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        @media (max-width: 480px) {
+            .v4-line-section .btn-line {
+                font-size: 13px;
+                padding: 16px 12px;
+            }
         }
     </style>
 </head>
@@ -344,19 +340,20 @@
 
         <div class="v4-thanks-wrap">
 
-            <!-- THANK YOU -->
-            <div class="v4-thanks-hero">
-                <h1 class="v4-thanks-hero-title">THANK YOU</h1>
+            <!-- Hero -->
+            <div class="v4-hero">
+                <svg class="v4-hero-badge" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="33" cy="33" r="31" fill="#eef8f2"/>
+                    <circle cx="33" cy="33" r="22" fill="#06C755"/>
+                    <path d="M24.5 33.5l5.5 5.5L42 27" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="v4-hero-eyebrow">THANK YOU</p>
+                <h1 class="v4-hero-title">面談予約が完了しました</h1>
+                <p class="v4-hero-lead">ご予約情報は以下ご確認ください。</p>
             </div>
-
-            <div style="text-align:center;">
-                <p class="v4-thanks-sub"><span class="v4-thanks-sub-text">面談予約が完了しました</span></p>
-            </div>
-
-            <p class="v4-thanks-lead">ご予約情報は以下ご確認ください。</p>
 
             <!-- 予約情報 -->
-            <div class="v4-info-card">
+            <div class="v4-info">
                 <div class="v4-info-row">
                     <div class="v4-info-key">方法</div>
                     <div class="v4-info-val">電話面談</div>
@@ -371,35 +368,35 @@
                 </div>
             </div>
 
-            <p class="v4-thanks-note">
+            <p class="v4-note">
                 ※ご予約情報については、後ほど担当者よりメールまたはショートメッセージにてお送りいたします。日程変更をご希望の場合は、お手数ですが担当者までご返信ください。
             </p>
 
             <!-- 転職エージェント セクション -->
-            <div class="v4-section v4-section--mint">
-                <div class="v4-section-tag-wrap">
-                    <span class="v4-section-tag">転職エージェント</span>
+            <div class="v4-section v4-section--tint">
+                <div class="v4-section-head">
+                    <span class="v4-eyebrow">転職エージェント</span>
+                    <h2 class="v4-section-title">私たちが転職活動を<br>サポートします！</h2>
                 </div>
-                <h2 class="v4-section-title">私たちが転職活動を<br>サポートします！</h2>
 
                 <div class="v4-advisors">
                     <div class="v4-advisor">
-                        <div class="v4-advisor-avatar">
+                        <div class="v4-advisor-av">
                             <img src="img/advisor1.jpg" alt="石野田">
                         </div>
-                        <div class="v4-advisor-name">石野田</div>
+                        <div class="v4-advisor-nm">石野田</div>
                     </div>
                     <div class="v4-advisor">
-                        <div class="v4-advisor-avatar">
+                        <div class="v4-advisor-av">
                             <img src="img/advisor2.jpg" alt="清野">
                         </div>
-                        <div class="v4-advisor-name">清野</div>
+                        <div class="v4-advisor-nm">清野</div>
                     </div>
                     <div class="v4-advisor">
-                        <div class="v4-advisor-avatar">
+                        <div class="v4-advisor-av">
                             <img src="img/advisor3.jpg" alt="佐藤">
                         </div>
-                        <div class="v4-advisor-name">佐藤</div>
+                        <div class="v4-advisor-nm">佐藤</div>
                     </div>
                 </div>
             </div>
@@ -409,68 +406,97 @@
                 <h2 class="v4-faq-title">よくある質問</h2>
                 <div class="v4-faq-list">
                     <div class="v4-faq-item">
-                        <div class="v4-faq-question">
-                            <span class="v4-faq-q-icon">?</span>
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
                             <span>なぜ無料で利用できる？</span>
                         </div>
-                        <p class="v4-faq-answer">当社は、採用が決定した際に企業様から成功報酬をいただいております。そのため、求職者の方すべてのサポートを無料でご利用できます。</p>
+                        <p class="v4-faq-a">当社は、採用が決定した際に企業様から成功報酬をいただいております。そのため、求職者の方すべてのサポートを無料でご利用できます。</p>
                     </div>
 
                     <div class="v4-faq-item">
-                        <div class="v4-faq-question">
-                            <span class="v4-faq-q-icon">?</span>
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
                             <span>登録したら必ず転職しなければいけない？</span>
                         </div>
-                        <p class="v4-faq-answer">いいえ、その必要はございません。<br>アドバイザーとの面談を通して、現職に留まるという選択をされる方もいらっしゃいます。無理に転職をお勧めすることはありませんので、お気軽にご相談ください。</p>
+                        <p class="v4-faq-a">いいえ、その必要はございません。<br>アドバイザーとの面談を通して、現職に留まるという選択をされる方もいらっしゃいます。無理に転職をお勧めすることはありませんので、お気軽にご相談ください。</p>
                     </div>
 
                     <div class="v4-faq-item">
-                        <div class="v4-faq-question">
-                            <span class="v4-faq-q-icon">?</span>
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
                             <span>経歴やスキルに自信がないけど転職できる？</span>
                         </div>
-                        <p class="v4-faq-answer">もちろんです、ご安心ください。<br>未経験から挑戦できる求人も多数ご紹介可能ですので、まずは一度、あなたのお話をお聞かせください。</p>
+                        <p class="v4-faq-a">もちろんです、ご安心ください。<br>未経験から挑戦できる求人も多数ご紹介可能ですので、まずは一度、あなたのお話をお聞かせください。</p>
                     </div>
 
                     <div class="v4-faq-item">
-                        <div class="v4-faq-question">
-                            <span class="v4-faq-q-icon">?</span>
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
                             <span>オンラインでの相談は可能？</span>
                         </div>
-                        <p class="v4-faq-answer">はい、可能です。お電話やWeb会議システムを利用したオンライン面談に対応しております。ご自宅などリラックスできる環境からご参加ください。</p>
+                        <p class="v4-faq-a">はい、可能です。お電話やWeb会議システムを利用したオンライン面談に対応しております。ご自宅などリラックスできる環境からご参加ください。</p>
                     </div>
                 </div>
             </div>
-
 
             <!-- 無料サポート セクション -->
-            <div class="v4-section v4-section--mint">
-                <div class="v4-section-tag-wrap">
-                    <span class="v4-section-tag">無料サポート</span>
+            <div class="v4-section v4-section--tint">
+                <div class="v4-section-head">
+                    <span class="v4-eyebrow">無料サポート</span>
+                    <h2 class="v4-section-title">「シゴト探し、何から？」<br>を一緒に解決しませんか？</h2>
                 </div>
-                <h2 class="v4-section-title">「シゴト探し、何から？」<br>を一緒に解決しませんか？</h2>
 
-                <div class="v4-support-list">
-                    <div class="v4-support-card right">
-                        <p class="v4-support-text">最後まで無料！<br>気軽に話すだけでもOK</p>
-                        <div class="v4-support-icon">💰</div>
+                <div class="v4-support">
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">最後まで無料！<br>気軽に話すだけでもOK</p>
                     </div>
-                    <div class="v4-support-card left">
-                        <div class="v4-support-icon">🤝</div>
-                        <p class="v4-support-text">プロが一緒に仕事探し<br>適職が見つかる！</p>
+
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="10.5" cy="10.5" r="6.5"/>
+                                <path d="M20 20l-4.1-4.1"/>
+                                <path d="M7.7 10.6l2 2 3.4-3.7"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">プロが一緒に仕事探し<br>適職が見つかる！</p>
                     </div>
-                    <div class="v4-support-card right">
-                        <p class="v4-support-text">プロが履歴書を作成<br>通過率グンとUP！</p>
-                        <div class="v4-support-icon">📝</div>
+
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/>
+                                <path d="M14 3v5h5"/>
+                                <path d="M9 13h6"/>
+                                <path d="M9 17h6"/>
+                                <path d="M9 9h1.5"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">プロが履歴書を作成<br>通過率グンとUP！</p>
                     </div>
-                    <div class="v4-support-card left">
-                        <div class="v4-support-icon">💼</div>
-                        <p class="v4-support-text">企業別の徹底対策で<br>面接も怖くない！</p>
+
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2.5" y="7.5" width="19" height="12" rx="2.5"/>
+                                <path d="M8.5 7.5V6.2A2.2 2.2 0 0 1 10.7 4h2.6a2.2 2.2 0 0 1 2.2 2.2v1.3"/>
+                                <path d="M2.5 12.5h19"/>
+                                <path d="M11 12.5h2"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">企業別の徹底対策で<br>面接も怖くない！</p>
                     </div>
                 </div>
             </div>
 
-            <!-- LINE CTA (既存スタイル再利用) -->
+            <!-- LINE CTA -->
             <div class="v4-line-section">
                 <div class="line-cta">
                     <h3 class="line-cta-title">LINEでのご相談も受付中！</h3>

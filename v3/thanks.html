@@ -3,11 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登録完了 | れいわキャリア</title>
+    <title>予約完了 | れいわキャリア</title>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5HKK3XQP');</script>
     <!-- End Google Tag Manager -->
-    <link rel="stylesheet" href="../style.css?v=20260603a">
+    <link rel="stylesheet" href="../style.css?v=20260528a">
+    <style>
+        /* ========================================================
+           v4 thanks page — refined design (れいわ緑 #06C755 基調)
+           ======================================================== */
+        :root {
+            --green: #06C755;
+            --green-deep: #04a346;
+            --green-ink: #0a833f;
+            --tint: #eef8f2;
+            --tint-soft: #f7fbf9;
+            --ink: #17241f;
+            --body: #4b5a54;
+            --muted: #8a978f;
+            --line: #e6efe9;
+            --shadow-sm: 0 1px 2px rgba(16,40,32,.04), 0 4px 14px rgba(16,40,32,.05);
+            --shadow-md: 0 2px 4px rgba(16,40,32,.05), 0 10px 30px rgba(16,40,32,.07);
+        }
+
+        /* ページ全体のトーン調整 (thanks 専用オーバーライド) */
+        .container {
+            box-shadow: 0 24px 70px rgba(20,40,30,.18);
+        }
+        .footer a {
+            color: var(--green-ink);
+        }
+
+        .v4-thanks-wrap {
+            max-width: 480px;
+            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== Hero (完了メッセージ) ===== */
+        .v4-hero {
+            text-align: center;
+            padding: 44px 24px 8px;
+        }
+        .v4-hero-badge {
+            width: 66px;
+            height: 66px;
+            margin: 0 auto 22px;
+            display: block;
+            animation: v4pop .55s cubic-bezier(.2,.8,.3,1.2) both;
+        }
+        .v4-hero-eyebrow {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .3em;
+            color: var(--green-ink);
+            text-indent: .3em;
+            margin-bottom: 14px;
+        }
+        .v4-hero-title {
+            font-size: 25px;
+            font-weight: 800;
+            line-height: 1.4;
+            letter-spacing: .01em;
+            color: var(--ink);
+            margin: 0 0 14px;
+        }
+        .v4-hero-lead {
+            font-size: 13.5px;
+            color: var(--body);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        @keyframes v4pop {
+            0%   { transform: scale(.6); opacity: 0; }
+            60%  { transform: scale(1.04); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .v4-hero-badge { animation: none; }
+        }
+
+        /* ===== 予約情報カード ===== */
+        .v4-info {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            margin: 26px 22px 0;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        .v4-info-row {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--line);
+            font-size: 14px;
+        }
+        .v4-info-row:last-child {
+            border-bottom: none;
+        }
+        .v4-info-key {
+            flex: 0 0 92px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .v4-info-val {
+            flex: 1;
+            color: var(--ink);
+            font-weight: 700;
+        }
+
+        .v4-note {
+            margin: 16px 24px 4px;
+            font-size: 11.5px;
+            color: var(--muted);
+            line-height: 1.85;
+        }
+
+        /* ===== セクション共通 ===== */
+        .v4-section {
+            padding: 46px 22px;
+            margin-top: 40px;
+        }
+        .v4-section--tint {
+            background: var(--tint);
+        }
+        .v4-section--white {
+            background: #fff;
+        }
+        .v4-section-head {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+        .v4-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 15px;
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--green-ink);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            box-shadow: var(--shadow-sm);
+        }
+        .v4-eyebrow::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+        .v4-section--tint .v4-eyebrow {
+            background: #fff;
+        }
+        .v4-section-title {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.5;
+            color: var(--ink);
+            margin: 14px 0 0;
+        }
+
+        /* ===== 転職エージェント (アドバイザー) ===== */
+        .v4-advisors {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .v4-advisor {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 18px 6px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .v4-advisor-av {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 10px;
+            background: var(--tint);
+            box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--line);
+        }
+        .v4-advisor-av img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 15%;
+        }
+        .v4-advisor-nm {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        /* ===== FAQ ===== */
+        .v4-faq-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--ink);
+            margin: 0 0 26px;
+        }
+        .v4-faq-list {
+            padding: 0 2px;
+        }
+        .v4-faq-item {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        .v4-faq-item:last-child {
+            margin-bottom: 0;
+        }
+        .v4-faq-q {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--ink);
+        }
+        .v4-faq-q-ic {
+            flex: 0 0 26px;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: var(--green);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            margin-top: 1px;
+        }
+        .v4-faq-a {
+            font-size: 13.5px;
+            color: var(--body);
+            line-height: 1.85;
+            padding-left: 38px;
+            margin: 10px 0 0;
+        }
+
+        /* ===== 無料サポート ===== */
+        .v4-support {
+            display: grid;
+            gap: 12px;
+        }
+        .v4-support-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .v4-support-ic {
+            flex: 0 0 56px;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: var(--tint);
+            color: var(--green-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .v4-support-ic svg {
+            width: 30px;
+            height: 30px;
+        }
+        .v4-support-tx {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.55;
+            color: var(--ink);
+        }
+
+        /* ===== LINE CTA (thanks 専用の微調整) ===== */
+        .v4-line-section {
+            padding: 46px 22px 8px;
+            background: #fff;
+        }
+        .v4-line-section .line-cta {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+            text-align: center;
+        }
+        .v4-line-section .line-cta-free {
+            letter-spacing: .12em;
+        }
+        .v4-line-section .btn-line {
+            display: flex;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        @media (max-width: 480px) {
+            .v4-line-section .btn-line {
+                font-size: 13px;
+                padding: 16px 12px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -17,42 +333,184 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <img src="https://file.mysquadbeyond.com/uploads/article_photo/photo/6579087/71364a69-8bc3-4aa1-8d7d-ee938268dfdd.png" alt="れいわキャリア">
+                <img src="https://file.mysquadbeyond.com/uploads/article_photo/photo/6579087/71364a69-8bc3-4aa1-8d7d-ee938268dfdd.png" alt="れいわキャリア" class="lazyload">
             </div>
             <p class="tagline">働き方も、自分らしく</p>
         </div>
 
-        <div class="form-container">
-            <div class="step">
-                <div class="completion">
-                    <div class="completion-icon">✅</div>
-                    <h2 class="completion-title">ご登録ありがとうございます</h2>
+        <div class="v4-thanks-wrap">
 
-                    <p class="thanks-line" style="margin-top:16px;">簡単<span class="highlight-3min">3分</span>電話相談</p>
-                    <p style="text-align:center; font-size:14px; color:#555; line-height:1.7; margin-bottom:16px;">
-                        希望職種や条件、お困りごとなど<br>
-                        なんでも相談可能です
-                    </p>
+            <!-- Hero -->
+            <div class="v4-hero">
+                <svg class="v4-hero-badge" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="33" cy="33" r="31" fill="#eef8f2"/>
+                    <circle cx="33" cy="33" r="22" fill="#06C755"/>
+                    <path d="M24.5 33.5l5.5 5.5L42 27" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="v4-hero-eyebrow">THANK YOU</p>
+                <h1 class="v4-hero-title">面談予約が完了しました</h1>
+                <p class="v4-hero-lead">ご予約情報は以下ご確認ください。</p>
+            </div>
 
-                    <p class="completion-message">
-                        担当者から<strong>1営業日以内</strong>にお電話させていただきます。
-                    </p>
+            <!-- 予約情報 -->
+            <div class="v4-info">
+                <div class="v4-info-row">
+                    <div class="v4-info-key">方法</div>
+                    <div class="v4-info-val">電話面談</div>
+                </div>
+                <div class="v4-info-row">
+                    <div class="v4-info-key">日時</div>
+                    <div class="v4-info-val" id="v4InterviewDateTime">読み込み中…</div>
+                </div>
+                <div class="v4-info-row">
+                    <div class="v4-info-key">所要時間</div>
+                    <div class="v4-info-val">3分程度</div>
+                </div>
+            </div>
 
-                    <div class="line-cta-block" style="margin-top:24px; padding:20px; background:#f0f9f3; border-radius:12px; text-align:left;">
-                        <p style="font-weight:bold; color:#06C755; margin-bottom:8px; font-size:16px;">💬 LINEでの相談も受付中</p>
-                        <p style="font-size:14px; line-height:1.6; color:#333; margin-bottom:16px;">
-                            れいわキャリアではLINEでの転職相談も承っております。<br>
-                            追加後、お名前をお送りいただくと担当者からご連絡させていただきます。<br>
-                            お友だち追加をお願いいたします！
-                        </p>
-                        <a href="https://liff.line.me/2008784499-92DR4hmy/landing?follow=%40872lluqj&lp=mZQNCq&liff_id=2008784499-92DR4hmy"
-                           target="_blank" rel="noopener"
-                           style="display:block; background:#06C755; color:#fff; text-align:center; padding:14px 20px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:16px;">
-                            LINEで友だち追加する
-                        </a>
+            <p class="v4-note">
+                ※ご予約情報については、後ほど担当者よりメールまたはショートメッセージにてお送りいたします。日程変更をご希望の場合は、お手数ですが担当者までご返信ください。
+            </p>
+
+            <!-- 転職エージェント セクション -->
+            <div class="v4-section v4-section--tint">
+                <div class="v4-section-head">
+                    <span class="v4-eyebrow">転職エージェント</span>
+                    <h2 class="v4-section-title">私たちが転職活動を<br>サポートします！</h2>
+                </div>
+
+                <div class="v4-advisors">
+                    <div class="v4-advisor">
+                        <div class="v4-advisor-av">
+                            <img src="/v4/img/advisor1.jpg" alt="石野田">
+                        </div>
+                        <div class="v4-advisor-nm">石野田</div>
+                    </div>
+                    <div class="v4-advisor">
+                        <div class="v4-advisor-av">
+                            <img src="/v4/img/advisor2.jpg" alt="清野">
+                        </div>
+                        <div class="v4-advisor-nm">清野</div>
+                    </div>
+                    <div class="v4-advisor">
+                        <div class="v4-advisor-av">
+                            <img src="/v4/img/advisor3.jpg" alt="佐藤">
+                        </div>
+                        <div class="v4-advisor-nm">佐藤</div>
                     </div>
                 </div>
             </div>
+
+            <!-- FAQ -->
+            <div class="v4-section v4-section--white">
+                <h2 class="v4-faq-title">よくある質問</h2>
+                <div class="v4-faq-list">
+                    <div class="v4-faq-item">
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
+                            <span>なぜ無料で利用できる？</span>
+                        </div>
+                        <p class="v4-faq-a">当社は、採用が決定した際に企業様から成功報酬をいただいております。そのため、求職者の方すべてのサポートを無料でご利用できます。</p>
+                    </div>
+
+                    <div class="v4-faq-item">
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
+                            <span>登録したら必ず転職しなければいけない？</span>
+                        </div>
+                        <p class="v4-faq-a">いいえ、その必要はございません。<br>アドバイザーとの面談を通して、現職に留まるという選択をされる方もいらっしゃいます。無理に転職をお勧めすることはありませんので、お気軽にご相談ください。</p>
+                    </div>
+
+                    <div class="v4-faq-item">
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
+                            <span>経歴やスキルに自信がないけど転職できる？</span>
+                        </div>
+                        <p class="v4-faq-a">もちろんです、ご安心ください。<br>未経験から挑戦できる求人も多数ご紹介可能ですので、まずは一度、あなたのお話をお聞かせください。</p>
+                    </div>
+
+                    <div class="v4-faq-item">
+                        <div class="v4-faq-q">
+                            <span class="v4-faq-q-ic">Q</span>
+                            <span>オンラインでの相談は可能？</span>
+                        </div>
+                        <p class="v4-faq-a">はい、可能です。お電話やWeb会議システムを利用したオンライン面談に対応しております。ご自宅などリラックスできる環境からご参加ください。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 無料サポート セクション -->
+            <div class="v4-section v4-section--tint">
+                <div class="v4-section-head">
+                    <span class="v4-eyebrow">無料サポート</span>
+                    <h2 class="v4-section-title">「シゴト探し、何から？」<br>を一緒に解決しませんか？</h2>
+                </div>
+
+                <div class="v4-support">
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">最後まで無料！<br>気軽に話すだけでもOK</p>
+                    </div>
+
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="10.5" cy="10.5" r="6.5"/>
+                                <path d="M20 20l-4.1-4.1"/>
+                                <path d="M7.7 10.6l2 2 3.4-3.7"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">プロが一緒に仕事探し<br>適職が見つかる！</p>
+                    </div>
+
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/>
+                                <path d="M14 3v5h5"/>
+                                <path d="M9 13h6"/>
+                                <path d="M9 17h6"/>
+                                <path d="M9 9h1.5"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">プロが履歴書を作成<br>通過率グンとUP！</p>
+                    </div>
+
+                    <div class="v4-support-card">
+                        <div class="v4-support-ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2.5" y="7.5" width="19" height="12" rx="2.5"/>
+                                <path d="M8.5 7.5V6.2A2.2 2.2 0 0 1 10.7 4h2.6a2.2 2.2 0 0 1 2.2 2.2v1.3"/>
+                                <path d="M2.5 12.5h19"/>
+                                <path d="M11 12.5h2"/>
+                            </svg>
+                        </div>
+                        <p class="v4-support-tx">企業別の徹底対策で<br>面接も怖くない！</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINE CTA -->
+            <div class="v4-line-section">
+                <div class="line-cta">
+                    <h3 class="line-cta-title">LINEでのご相談も受付中！</h3>
+                    <p class="line-cta-text">
+                        れいわキャリアでは<span class="line-cta-highlight">LINEでの転職相談</span>も承っております。よろしければ、お友だち追加をお願いいたします！
+                    </p>
+                    <p class="line-cta-free">\ 相談無料 /</p>
+                    <a href="https://liff.line.me/2008784499-92DR4hmy/landing?follow=%40872lluqj&lp=Ne7Geo&liff_id=2008784499-92DR4hmy" class="btn-line" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="white" style="margin-right:8px;vertical-align:middle;flex-shrink:0;"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.53 2.1 6.62 5.24 8.38L6.5 22l3.06-1.6C10.28 20.78 11.13 21 12 21c5.52 0 10-4.02 10-9S17.52 2 12 2z"/></svg>
+                        LINEでれいわキャリアとお友だちになる
+                    </a>
+                </div>
+            </div>
+
         </div>
 
         <div class="footer">
@@ -66,5 +524,17 @@
             </p>
         </div>
     </div>
+
+    <script>
+        // 面談日時を sessionStorage から取得して表示
+        (function() {
+            var label = '';
+            try { label = sessionStorage.getItem('v4_interview_label') || ''; } catch (e) {}
+            var el = document.getElementById('v4InterviewDateTime');
+            if (el) {
+                el.textContent = label || '担当者からご連絡いたします';
+            }
+        })();
+    </script>
 </body>
 </html>
