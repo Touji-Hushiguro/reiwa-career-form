@@ -105,6 +105,78 @@ body {
     margin-bottom: 0;
 }
 
+/* ============================================================ */
+/* Step8 (面談日程選択) 洗練レイアウト                            */
+/*  - 上部テキストの主従を整理（挨拶=補助 / 見出し=主役）        */
+/*  - 選択肢はブランドグリーンの選択状態で上質に                  */
+/*  - #step8 スコープ限定（他ステップ・v3には影響なし）           */
+/* ============================================================ */
+
+/* ステップ番号: 控えめに */
+#step8 .step-indicator { margin-bottom: 16px; color: #9aa4a0; letter-spacing: .06em; }
+
+/* 挨拶: 主張を抑えた補助行へ（見出しと競合させない） */
+#step8 .thanks-line { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+
+/* 見出し: このステップの主役。各文=1行の2行構成（271px幅に収まる16px）。
+   端まで使えるよう左右に負マージンで安全幅を確保 */
+#step8 .question-title { font-size: 16px; line-height: 1.65; margin: 0 -10px 14px; letter-spacing: 0; }
+
+/* 3分アクセント: 角を少し柔らかく */
+#step8 .highlight-3min { padding: 2px 9px; border-radius: 7px; }
+
+/* 注記: 静かなキャプション */
+#step8 .slot-change-note { margin: 0 0 14px !important; font-size: 12px; color: #9aa4a0; }
+
+/* 選択肢: 余白と質感 */
+#step8 .radio-options { gap: 11px; }
+#step8 .radio-option {
+    padding: 15px 18px;
+    border-radius: 14px;
+    border: 1.5px solid #e8ecea;
+    font-size: 15px;
+    box-shadow: 0 1px 2px rgba(16, 40, 32, .03);
+    transition: border-color .15s, background .15s, box-shadow .15s;
+}
+#step8 .radio-option:hover { border-color: #b7e6c9; background: #f7fcf9; }
+
+/* ラジオ丸: 細く上品に */
+#step8 .radio-circle { width: 20px; height: 20px; border: 2px solid #c4ccc8; }
+
+/* 選択状態: ブランドグリーンで確定感（黒枠を廃止） */
+#step8 .radio-option.selected {
+    border-color: #06C755;
+    background: #f0faf4;
+    box-shadow: 0 2px 8px rgba(6, 199, 85, .12);
+}
+#step8 .radio-option.selected .radio-circle {
+    border-color: #06C755;
+    background: #06C755;
+}
+#step8 .radio-option.selected .radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-50%, -50%);
+}
+
+/* 「その他」= 展開できることを示すシェブロン */
+#step8 .radio-options .radio-option:last-child::after {
+    content: '';
+    margin-left: auto;
+    width: 7px; height: 7px;
+    border-right: 2px solid #c4ccc8;
+    border-bottom: 2px solid #c4ccc8;
+    transform: rotate(45deg);
+    margin-right: 3px;
+}
+
+/* 操作ボタン: 上の余白を適正化 */
+#step8 .button-group { margin-top: 14px; }
+
 .required {
     color: #ff4444;
     font-size: 12px;
