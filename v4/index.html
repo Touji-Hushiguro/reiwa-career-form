@@ -8,6 +8,95 @@
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5HKK3XQP');</script>
     <!-- End Google Tag Manager -->
     <link rel="stylesheet" href="../style.css?v=20260715a">
+    <style>
+      /* ===== 離脱防止ポップアップ (フルスクリーン) ===== */
+      .exit-popup {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        width: 100%;
+        height: 100vh;      /* フォールバック */
+        height: 100dvh;
+        overflow: hidden;
+        background: #f8f4e8; /* 画像に合わせたアイボリー */
+      }
+      .exit-popup[hidden] { display: none; }
+      .exit-popup__scroll {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+      .exit-popup__creative {
+        position: relative;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      .exit-popup__creative img {
+        display: block;
+        width: 100%;
+        height: auto;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      /* 画像内の×・CTA・辞退に重ねる透明クリック領域 (画像比率%) */
+      .exit-popup__close-area,
+      .exit-popup__primary,
+      .exit-popup__secondary {
+        position: absolute;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .exit-popup__close-area { top: 0.8%; right: 1.5%; width: 15%; height: 4.5%; }
+      .exit-popup__primary   { left: 3%;  width: 94%; top: 83%;   height: 8%; }
+      .exit-popup__secondary { left: 6%;  width: 88%; top: 92.6%; height: 6%; }
+      /* スクロール時に出現する固定×ボタン（画像内×が隠れても常に閉じられる） */
+      .exit-popup__close-fixed {
+        position: fixed;
+        top: max(12px, env(safe-area-inset-top));
+        right: max(12px, env(safe-area-inset-right));
+        z-index: 2;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 0;
+        background: rgba(255,255,255,0.92);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease;
+      }
+      .exit-popup__close-fixed.is-visible { opacity: 1; visibility: visible; }
+      body.exit-popup-open { overflow: hidden; }
+
+      /* PC・タブレット: スマホ相当の幅で中央表示（引き伸ばさない） */
+      @media (min-width: 768px) {
+        .exit-popup {
+          background: radial-gradient(circle at top, #fff9dd 0%, #f6e9a8 55%, #f0d752 100%);
+        }
+        .exit-popup__scroll {
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          padding: 24px 0 40px;
+        }
+        .exit-popup__creative {
+          max-width: 460px;
+          box-shadow: 0 0 40px rgba(0,0,0,0.14);
+          border-radius: 14px;
+          overflow: hidden;
+        }
+      }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -284,5 +373,232 @@
     </div>
 
     <script src="script.js?v=20260528a"></script>
+
+    <!-- ===== 離脱防止ポップアップ（フルスクリーン） ===== -->
+    <div class="exit-popup" id="exitPopup" role="dialog" aria-modal="true" aria-label="面談予約者限定オファー" hidden>
+      <div class="exit-popup__scroll" id="exitPopupScroll">
+        <div class="exit-popup__creative">
+          <img src="img/reiwa-career-exit-popup.png" alt="面談予約者限定 今月のピックアップ求人をチェック 20代向けの無料転職サポート" draggable="false">
+          <button class="exit-popup__close-area" type="button" aria-label="ポップアップを閉じる" onclick="exitPopupDismiss('close_button')"></button>
+          <button class="exit-popup__primary" type="button" aria-label="面談を予約して求人を見る" onclick="exitPopupPrimary()"></button>
+          <button class="exit-popup__secondary" type="button" aria-label="今回は見ない" onclick="exitPopupDismiss('secondary')"></button>
+        </div>
+      </div>
+      <button class="exit-popup__close-fixed" id="exitPopupCloseFixed" type="button" aria-label="ポップアップを閉じる" onclick="exitPopupDismiss('close_button')">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#333" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <script>
+    (function(){
+      /* ===== 離脱防止POP: 表示制御・トリガー・計測 ===== */
+      var SHOWN_KEY = 'reiwaCareerExitPopupShown';   // 1セッション1回制御
+      var SEEN_KEY  = 'reiwaCareerExitPopupSeen';    // 成果アトリビューション用（サンクスで参照）
+      var VARIANT   = 'pickup_jobs_pop_art_v1';
+      var INACT_MS  = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 20000 : 30000;
+      var ARM_DELAY = 2000;
+
+      var popup = document.getElementById('exitPopup');
+      var scroller = document.getElementById('exitPopupScroll');
+      var closeFixed = document.getElementById('exitPopupCloseFixed');
+      var popupImg = popup ? popup.querySelector('img') : null;
+      if (!popup) return;
+
+      var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+      var deviceType = isTouch ? 'mobile' : 'desktop';
+      var isOpen = false, savedY = 0, armed = false, guardPushed = false;
+      var inactivityTimer = null, imgOk = false;
+
+      // 通信節約モードでは画像重POPを出さない
+      var reduceData = false;
+      try {
+        reduceData = (navigator.connection && navigator.connection.saveData) ||
+                     (window.matchMedia && window.matchMedia('(prefers-reduced-data: reduce)').matches);
+      } catch(e){}
+
+      function checkImg(){ imgOk = !!(popupImg && popupImg.complete && popupImg.naturalWidth > 0); }
+      if (popupImg) {
+        checkImg();
+        popupImg.addEventListener('load', checkImg);
+        popupImg.addEventListener('error', function(){ imgOk = false; });
+      }
+
+      function shown(){ try { return sessionStorage.getItem(SHOWN_KEY) === '1'; } catch(e){ return false; } }
+      function markShown(){ try { sessionStorage.setItem(SHOWN_KEY, '1'); sessionStorage.setItem(SEEN_KEY, '1'); } catch(e){} }
+
+      // 現在表示中のステップID
+      function visibleStepId(){
+        var steps = document.querySelectorAll('.step');
+        for (var i=0;i<steps.length;i++){
+          if (!steps[i].classList.contains('hidden') && steps[i].offsetParent !== null) return steps[i].id;
+        }
+        return '';
+      }
+      // 個人情報入力ステップか（数字でなくフィールド種別で判定: 氏名/電話/メール/面談日時）
+      function onPersonalInfoStep(){
+        var id = visibleStepId(); if (!id) return false;
+        var el = document.getElementById(id); if (!el) return false;
+        return !!el.querySelector('#fullName, #phone, #email, #step8Options');
+      }
+      function isSubmitting(){
+        var l = document.getElementById('formLoading');
+        return !!(l && getComputedStyle(l).display !== 'none');
+      }
+      function hasVisibleError(){
+        var errs = document.querySelectorAll('.error-message, #birthError, #otpError');
+        for (var i=0;i<errs.length;i++){ if (getComputedStyle(errs[i]).display !== 'none') return true; }
+        return false;
+      }
+
+      // 表示可否（全禁止条件を集約）
+      function canShow(){
+        if (isOpen || shown()) return false;
+        if (reduceData) return false;
+        if (!imgOk) { checkImg(); if (!imgOk) return false; }        // 画像未ロードは出さない
+        if (document.visibilityState !== 'visible') return false;    // 非アクティブタブ
+        if (isSubmitting()) return false;                            // 送信処理中
+        if (!onPersonalInfoStep()) return false;                     // 対象ステップ外（序盤の選択質問など）
+        return true;
+      }
+
+      function pushEvent(name, extra){
+        var p = { event: name, popup_variant: VARIANT, form_step: visibleStepId(), device_type: deviceType };
+        if (extra) for (var k in extra){ p[k] = extra[k]; }
+        try { window.dataLayer = window.dataLayer || []; window.dataLayer.push(p); } catch(e){}
+      }
+
+      function openPopup(triggerType, force){
+        if (!force && !canShow()) return;
+        if (isOpen || shown()) return;
+        isOpen = true; markShown();
+        savedY = window.scrollY || window.pageYOffset || 0;
+        popup.hidden = false;
+        document.body.classList.add('exit-popup-open');
+        document.body.style.position = 'fixed';
+        document.body.style.top = (-savedY) + 'px';
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        if (scroller) scroller.scrollTop = 0;
+        if (closeFixed) closeFixed.classList.remove('is-visible');
+        clearInactivity();
+        pushEvent('exit_popup_impression', { trigger_type: triggerType || 'unknown' });
+      }
+      // テスト用（ステップ制限を無視して強制表示）
+      window.showExitPopup = function(){ openPopup('manual', true); };
+
+      function doClose(){
+        isOpen = false;
+        popup.hidden = true;
+        document.body.classList.remove('exit-popup-open');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, savedY); // 元のスクロール位置・入力状態へ戻る（フォームDOMは不変）
+      }
+
+      // メインCTA: 閉じてフォームへ復帰（次の未入力項目へフォーカス/スクロール）。送信・予約確定はしない
+      window.exitPopupPrimary = function(){
+        if (!isOpen) return;
+        pushEvent('exit_popup_primary_click');
+        var stepEl = document.getElementById(visibleStepId());
+        doClose();
+        setTimeout(function(){
+          if (!stepEl) return;
+          var fields = stepEl.querySelectorAll('input:not([type=hidden]):not([disabled]), select, textarea');
+          for (var i=0;i<fields.length;i++){
+            if (!fields[i].value && fields[i].offsetParent !== null){
+              try { fields[i].focus(); } catch(e){}
+              fields[i].scrollIntoView({ block: 'center', behavior: 'smooth' });
+              return;
+            }
+          }
+          var next = stepEl.querySelector('.btn-next, .btn'); // 全入力済みなら次へボタンへ
+          if (next) next.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 60);
+      };
+
+      // サブCTA / × / Esc / back: 閉じる（入力・位置保持、同一セッション再表示なし）
+      window.exitPopupDismiss = function(closeType){
+        if (!isOpen) return;
+        if (closeType === 'secondary') pushEvent('exit_popup_secondary_click');
+        pushEvent('exit_popup_close', { close_type: closeType || 'close_button' });
+        doClose();
+      };
+
+      // スクロールで画像内×が隠れたら固定×を表示（常に閉じられる）
+      if (scroller && closeFixed) {
+        scroller.addEventListener('scroll', function(){
+          if (scroller.scrollTop > 40) closeFixed.classList.add('is-visible');
+          else closeFixed.classList.remove('is-visible');
+        }, { passive: true });
+      }
+
+      // バナーのどこをタップ/クリックしても閉じる（特定ボタンは各自の動作を優先）
+      // ※スクロール等のドラッグ操作では click は発火しないため誤閉じしない
+      popup.addEventListener('click', function(e){
+        if (e.target.closest('.exit-popup__primary, .exit-popup__secondary, .exit-popup__close-area, .exit-popup__close-fixed')) return;
+        window.exitPopupDismiss('background');
+      });
+
+      // ===== 非操作タイマー（優先度3） =====
+      function clearInactivity(){ if (inactivityTimer){ clearTimeout(inactivityTimer); inactivityTimer = null; } }
+      function scheduleInactivity(){
+        clearInactivity();
+        if (!armed || shown() || isOpen) return;
+        inactivityTimer = setTimeout(function(){
+          // 発火時の抑止（エラー閲覧中/送信中/非表示タブ等は条件が整うまで待つ）
+          if (hasVisibleError() || !canShow()) { scheduleInactivity(); return; }
+          openPopup('inactivity');
+        }, INACT_MS);
+      }
+      function maybePushGuard(){
+        if (isTouch && !guardPushed && !shown() && onPersonalInfoStep()) {
+          try { history.pushState({ exitGuard: true }, ''); } catch(e){}
+          guardPushed = true;
+        }
+      }
+      function onActivity(){
+        maybePushGuard();
+        scheduleInactivity();  // 操作のたびにタイマーをリセット
+      }
+      ['input','change','click','touchstart','scroll','keydown','focusin'].forEach(function(ev){
+        document.addEventListener(ev, onActivity, { passive: true });
+      });
+      document.addEventListener('visibilitychange', function(){
+        if (document.visibilityState === 'visible') scheduleInactivity();
+        else clearInactivity(); // バックグラウンド時間は非操作時間に加算しない
+      });
+
+      // トリガー有効化
+      setTimeout(function(){ armed = true; maybePushGuard(); scheduleInactivity(); }, ARM_DELAY);
+
+      if (!isTouch) {
+        // PC 優先度1: マウスが上端から抜けた瞬間（上方向のみ）
+        document.addEventListener('mouseout', function(e){
+          if (!armed) return;
+          if (e.clientY <= 10 && !e.relatedTarget) openPopup('mouseleave');
+        });
+        // PC: Escape で閉じる（＝「今回は見ない」相当）
+        document.addEventListener('keydown', function(e){
+          if (isOpen && (e.key === 'Escape' || e.keyCode === 27)) window.exitPopupDismiss('escape');
+        });
+      } else {
+        // スマホ 優先度1: 「戻る」操作（対象ステップ到達時にダミー履歴を積む）
+        window.addEventListener('popstate', function(){
+          if (isOpen) {                       // 表示中の戻る → まず閉じる（次の戻るは通常動作）
+            window.exitPopupDismiss('back');
+            try { history.pushState({ exitGuard: true }, ''); } catch(e){}
+            return;
+          }
+          if (shown() || !canShow()) return;  // 既出/対象外は通常の戻るを許可
+          openPopup('back');
+          try { history.pushState({ exitGuard: true }, ''); } catch(e){} // 次の戻るも捕捉
+        });
+      }
+    })();
+    </script>
 </body>
 </html>
