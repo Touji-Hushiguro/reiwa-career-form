@@ -536,5 +536,19 @@
             }
         })();
     </script>
+    <script>
+        // 離脱POP経由の成果アトリビューション（POP表示ユーザーが予約完了に到達）
+        (function(){
+            try {
+                if (sessionStorage.getItem('reiwaCareerExitPopupSeen') === '1') {
+                    var dt = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 'mobile' : 'desktop';
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({ event: 'exit_popup_form_complete', popup_variant: 'pickup_jobs_pop_art_v1', device_type: dt });
+                    window.dataLayer.push({ event: 'exit_popup_booking_complete', popup_variant: 'pickup_jobs_pop_art_v1', device_type: dt });
+                    sessionStorage.removeItem('reiwaCareerExitPopupSeen');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </body>
 </html>
