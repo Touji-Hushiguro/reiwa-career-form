@@ -444,7 +444,10 @@
         return !!(l && getComputedStyle(l).display !== 'none');
       }
       function hasVisibleError(){
-        var errs = document.querySelectorAll('.error-message, #birthError, #otpError');
+        // 表示中ステップ内のエラーのみ判定（過去ステップの残存エラーで永久抑止されるのを防ぐ）
+        var id = visibleStepId(); if (!id) return false;
+        var el = document.getElementById(id); if (!el) return false;
+        var errs = el.querySelectorAll('.error-message, #birthError, #otpError');
         for (var i=0;i<errs.length;i++){ if (getComputedStyle(errs[i]).display !== 'none') return true; }
         return false;
       }
@@ -570,6 +573,26 @@
         if (document.visibilityState === 'visible') scheduleInactivity();
         else clearInactivity(); // バックグラウンド時間は非操作時間に加算しない
       });
+
+      // ステップ遷移を検知（OTP認証後など、操作なしで面談日時ステップへ来るケースに対応）
+      // 到達した瞬間に「戻る」用の履歴ガードを積み、非操作カウントを開始する
+      (function watchStepChange(){
+        var lastId = '';
+        function onStepChanged(){
+          var id = visibleStepId();
+          if (id === lastId) return;
+          lastId = id;
+          maybePushGuard();
+          scheduleInactivity();
+        }
+        var target = document.getElementById('formContent') || document.body;
+        try {
+          new MutationObserver(onStepChanged).observe(target, {
+            attributes: true, attributeFilter: ['class', 'style'], subtree: true
+          });
+        } catch(e){}
+        onStepChanged();
+      })();
 
       // トリガー有効化
       setTimeout(function(){ armed = true; maybePushGuard(); scheduleInactivity(); }, ARM_DELAY);
