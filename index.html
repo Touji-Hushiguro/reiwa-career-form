@@ -433,11 +433,11 @@
         }
         return '';
       }
-      // 個人情報入力ステップか（数字でなくフィールド種別で判定: 氏名/電話/メール/面談日時）
-      function onPersonalInfoStep(){
+      // 面談日時選択ステップか（数字でなくUI要素で判定。SMS認証待ち等では出さない）
+      function onInterviewSlotStep(){
         var id = visibleStepId(); if (!id) return false;
         var el = document.getElementById(id); if (!el) return false;
-        return !!el.querySelector('#fullName, #phone, #email, #step8Options, #btnInstant');
+        return !!el.querySelector('#step8Options, #btnInstant');
       }
       function isSubmitting(){
         var l = document.getElementById('formLoading');
@@ -456,7 +456,7 @@
         if (!imgOk) { checkImg(); if (!imgOk) return false; }        // 画像未ロードは出さない
         if (document.visibilityState !== 'visible') return false;    // 非アクティブタブ
         if (isSubmitting()) return false;                            // 送信処理中
-        if (!onPersonalInfoStep()) return false;                     // 対象ステップ外（序盤の選択質問など）
+        if (!onInterviewSlotStep()) return false;                     // 対象は面談日時ステップのみ
         return true;
       }
 
@@ -554,7 +554,7 @@
         }, INACT_MS);
       }
       function maybePushGuard(){
-        if (isTouch && !guardPushed && !shown() && onPersonalInfoStep()) {
+        if (isTouch && !guardPushed && !shown() && onInterviewSlotStep()) {
           try { history.pushState({ exitGuard: true }, ''); } catch(e){}
           guardPushed = true;
         }
