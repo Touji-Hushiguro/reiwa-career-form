@@ -423,6 +423,7 @@
       var VARIANT   = 'pickup_jobs_pop_art_v1';
       var INACT_MS  = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 20000 : 30000;
       var ARM_DELAY = 2000;
+      var MIN_DWELL_MS = 5000;   // 対象ステップ到達直後は出さない猶予
 
       var popup = document.getElementById('exitPopup');
       var scroller = document.getElementById('exitPopupScroll');
@@ -432,7 +433,7 @@
 
       var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
       var deviceType = isTouch ? 'mobile' : 'desktop';
-      var isOpen = false, savedY = 0, armed = false, guardPushed = false;
+      var isOpen = false, savedY = 0, armed = false, guardPushed = false, targetEnteredAt = 0;
       var inactivityTimer = null, imgOk = false;
 
       // 通信節約モードでは画像重POPを出さない
@@ -487,6 +488,8 @@
         if (document.visibilityState !== 'visible') return false;    // 非アクティブタブ
         if (isSubmitting()) return false;                            // 送信処理中
         if (!onInterviewSlotStep()) return false;                     // 対象は面談日時ステップのみ
+        // 到達直後の即時表示を防ぐ（前ステップから持ち越したタイマーで出るのを防止）
+        if (!targetEnteredAt || (Date.now() - targetEnteredAt) < MIN_DWELL_MS) return false;
         return true;
       }
 
@@ -609,6 +612,8 @@
           var id = visibleStepId();
           if (id === lastId) return;
           lastId = id;
+          // 対象ステップに到達した時刻を記録し、放置カウントをここから開始し直す
+          targetEnteredAt = onInterviewSlotStep() ? Date.now() : 0;
           maybePushGuard();
           scheduleInactivity();
         }
