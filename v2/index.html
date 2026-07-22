@@ -461,11 +461,20 @@
         }
         return '';
       }
-      // 面談日時選択ステップか（数字でなくUI要素で判定。SMS認証待ち等では出さない）
-      function onInterviewSlotStep(){
+      // POP対象ステップか（数字でなくUI要素で判定）
+      //   1) 面談日時ステップ（v4/default=#step8Options / v2=#btnInstant）
+      //   2) 連絡先ステップの「電話番号入力中」のみ
+      //      ※認証コード(OTP)入力中は絶対に対象外＝コード待ちの邪魔をしない
+      function onTargetStep(){
         var id = visibleStepId(); if (!id) return false;
         var el = document.getElementById(id); if (!el) return false;
-        return !!el.querySelector('#step8Options, #btnInstant');
+        if (el.querySelector('#step8Options, #btnInstant')) return true;
+        var phoneArea = el.querySelector('#phoneInputArea');
+        if (!phoneArea) return false;
+        var otpArea = el.querySelector('#otpInputArea');
+        var otpVisible = !!(otpArea && getComputedStyle(otpArea).display !== 'none');
+        var phoneVisible = getComputedStyle(phoneArea).display !== 'none';
+        return phoneVisible && !otpVisible;
       }
       function isSubmitting(){
         var l = document.getElementById('formLoading');
@@ -487,7 +496,7 @@
         if (!imgOk) { checkImg(); if (!imgOk) return false; }        // 画像未ロードは出さない
         if (document.visibilityState !== 'visible') return false;    // 非アクティブタブ
         if (isSubmitting()) return false;                            // 送信処理中
-        if (!onInterviewSlotStep()) return false;                     // 対象は面談日時ステップのみ
+        if (!onTargetStep()) return false;                            // 対象は電話番号入力中／面談日時のみ
         // 到達直後の即時表示を防ぐ（前ステップから持ち越したタイマーで出るのを防止）
         if (!targetEnteredAt || (Date.now() - targetEnteredAt) < MIN_DWELL_MS) return false;
         return true;
@@ -587,7 +596,7 @@
         }, INACT_MS);
       }
       function maybePushGuard(){
-        if (isTouch && !guardPushed && !shown() && onInterviewSlotStep()) {
+        if (isTouch && !guardPushed && !shown() && onTargetStep()) {
           try { history.pushState({ exitGuard: true }, ''); } catch(e){}
           guardPushed = true;
         }
@@ -607,13 +616,15 @@
       // ステップ遷移を検知（OTP認証後など、操作なしで面談日時ステップへ来るケースに対応）
       // 到達した瞬間に「戻る」用の履歴ガードを積み、非操作カウントを開始する
       (function watchStepChange(){
-        var lastId = '';
+        var lastKey = '';
         function onStepChanged(){
-          var id = visibleStepId();
-          if (id === lastId) return;
-          lastId = id;
-          // 対象ステップに到達した時刻を記録し、放置カウントをここから開始し直す
-          targetEnteredAt = onInterviewSlotStep() ? Date.now() : 0;
+          // ステップIDだけでなく対象状態も見る（step6内の 電話入力⇔OTP入力 の切替を検知するため）
+          var isTarget = onTargetStep();
+          var key = visibleStepId() + '|' + (isTarget ? '1' : '0');
+          if (key === lastKey) return;
+          lastKey = key;
+          // 対象状態に入った時刻を記録し、放置カウントをここから開始し直す
+          targetEnteredAt = isTarget ? Date.now() : 0;
           maybePushGuard();
           scheduleInactivity();
         }
