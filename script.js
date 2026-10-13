@@ -98,6 +98,23 @@ window.validateStep4 = function() {
     }
 };
 
+// 希望勤務地: 主要都市ボタン / その他プルダウン（どちらも #prefecture に値を入れて前進）
+window.selectLocation = function(value, el) {
+    var c = document.getElementById('step4');
+    c.querySelectorAll('.option-button').forEach(function(b){ b.classList.remove('selected'); });
+    if (el) el.classList.add('selected');
+    var other = document.getElementById('prefectureOther');
+    if (other) other.selectedIndex = 0;
+    document.getElementById('prefecture').value = value;
+    setTimeout(function(){ nextStep(); }, 300);
+};
+window.selectLocationOther = function(sel) {
+    if (!sel.value) return;
+    document.getElementById('step4').querySelectorAll('.option-button').forEach(function(b){ b.classList.remove('selected'); });
+    document.getElementById('prefecture').value = sel.value;
+    setTimeout(function(){ nextStep(); }, 300);
+};
+
 // IME入力中フラグ（カタカナ変換のカーソルバグ防止）
 var isComposingName = false;
 (function() {
